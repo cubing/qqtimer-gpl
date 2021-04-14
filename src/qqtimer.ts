@@ -11,32 +11,34 @@ type AllStatsWithSD = [
   sessionmean: number
 ];
 
-var startTime;
-var curTime;
-var inspectionTime;
-var timerStatus; // 0 = stopped, 1 = running, 2 = inspecting, 3 = waiting, 4 = memo
-var times = [];
-var notes = [];
-var comments = [];
-var scrambleArr = [];
-var scramble;
-var lastscramble;
-var importScrambles = [];
-var timerID;
-var inspectionID;
-var memoID;
+const setInterval = window.setInterval; // TODO
+
+var startTime: Date | undefined;
+var curTime: Date | undefined;
+var inspectionTime: Date | undefined;
+var timerStatus: 0 | 1 | 2 | 3 | 4; // 0 = stopped, 1 = running, 2 = inspecting, 3 = waiting, 4 = memo
+var times: number[] = [];
+var notes: (0 | 1 | 2)[] = [];
+var comments: string[] = [];
+var scrambleArr: string[] = [];
+var scramble: string;
+var lastscramble: string;
+// var importScrambles = []; // TODO: Remove
+var timerID: number;
+var inspectionID: number;
+var memoID: number;
 var timerupdate = 1;
-var highlightStart;
-var highlightStop;
-var highlightID;
-var sessionID = 0;
+var highlightStart: number;
+var highlightStop: number;
+var highlightID: number;
+// var sessionID = 0; // TODO: Remove
 var initoncesq1 = 1;
 var nightMode = false;
 
 // Missing values
 let memoTime: Date; // TODO: why was this missing from the original?
-let useMoN;
-let useMono;
+let useMoN: number;
+let useMono: number;
 
 function $(str: string): HTMLElement {
   return document.getElementById(str);
