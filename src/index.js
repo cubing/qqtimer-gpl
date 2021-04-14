@@ -6,5 +6,4 @@ for (const [name, fn] of Object.entries(globals)) {
 
 document.addEventListener("DOMContentLoaded", () => {
   initialize(true, true);
-})
-
+});

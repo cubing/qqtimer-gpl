@@ -10,22 +10,20 @@ Compiled to Javascript using GWT.
 
  */
 
-
 if (typeof scramblers === "undefined") {
   var scramblers = {};
 }
 
-function nullMethod(){
-}
+function nullMethod() {}
 
-function createArray(length1, length2){
+function createArray(length1, length2) {
   var result, i;
   result = Array(length1);
-  for (i=0; i<length1; result[i++]=Array(length2));
+  for (i = 0; i < length1; result[i++] = Array(length2));
   return result;
 }
 
-function $clinit_CoordCube(){
+function $clinit_CoordCube() {
   $clinit_CoordCube = nullMethod;
   UDSliceMove = createArray(495, 18);
   TwistMove = createArray(324, 18);
@@ -45,22 +43,22 @@ function $clinit_CoordCube(){
   MEPermPrun = Array(66432);
 }
 
-function initCParity(){
+function initCParity() {
   var i;
-  for (i=0; i<346; ++i) {
+  for (i = 0; i < 346; ++i) {
     CParity[i] = 0;
   }
   for (i = 0; i < 2768; ++i) {
-    CParity[i >>> 3] = (CParity[i >>> 3] | get8Parity((CPermS2R)[i]) << (i & 7));
+    CParity[i >>> 3] = CParity[i >>> 3] | (get8Parity(CPermS2R[i]) << (i & 7));
   }
 }
 
-function initCPermMove(){
+function initCPermMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 2768; ++i) {
-    set8Perm(c.cp, (CPermS2R)[i]);
+    set8Perm(c.cp, CPermS2R[i]);
     for (j = 0; j < 18; ++j) {
       CornMult(c, moveCube[j], d);
       CPermMove[i][j] = $getCPermSym(d);
@@ -68,12 +66,12 @@ function initCPermMove(){
   }
 }
 
-function initEPermMove(){
+function initEPermMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 2768; ++i) {
-    set8Perm(c.ep, (EPermS2R)[i]);
+    set8Perm(c.ep, EPermS2R[i]);
     for (j = 0; j < 10; ++j) {
       EdgeMult(c, moveCube[ud2std[j]], d);
       EPermMove[i][j] = $getEPermSym(d);
@@ -81,12 +79,12 @@ function initEPermMove(){
   }
 }
 
-function initFlipMove(){
+function initFlipMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 336; ++i) {
-    $setFlip(c, (FlipS2R)[i]);
+    $setFlip(c, FlipS2R[i]);
     for (j = 0; j < 18; ++j) {
       EdgeMult(c, moveCube[j], d);
       FlipMove[i][j] = $getFlipSym(d);
@@ -94,20 +92,41 @@ function initFlipMove(){
   }
 }
 
-function initMCEPermPrun(callback){
-  var SymState, c, check, corn, cornx, d, depth, done, edge, edgex, i, idx, idxx, inv, j, m_0, mid, midx, select, sym, symx;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+function initMCEPermPrun(callback) {
+  var SymState,
+    c,
+    check,
+    corn,
+    cornx,
+    d,
+    depth,
+    done,
+    edge,
+    edgex,
+    i,
+    idx,
+    idxx,
+    inv,
+    j,
+    m_0,
+    mid,
+    midx,
+    select,
+    sym,
+    symx;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   depth = 0;
   done = 1;
   SymState = Array(2768);
   for (i = 0; i < 2768; ++i) {
     SymState[i] = 0;
-    set8Perm(c.ep, (EPermS2R)[i]);
+    set8Perm(c.ep, EPermS2R[i]);
     for (j = 1; j < 16; ++j) {
       EdgeMult(CubeSym[SymInv[j]], c, temp_0);
       EdgeMult(temp_0, CubeSym[j], d);
-      binarySearch(EPermS2R, get8Perm(d.ep)) != 65535 && (SymState[i] = (SymState[i] | 1 << j));
+      binarySearch(EPermS2R, get8Perm(d.ep)) != 65535 &&
+        (SymState[i] = SymState[i] | (1 << j));
     }
   }
   for (i = 0; i < 66432; ++i) {
@@ -116,8 +135,8 @@ function initMCEPermPrun(callback){
   MEPermPrun[0] = 0;
   while (done < 66432) {
     inv = depth > 7;
-    select = inv?-1:depth;
-    check = inv?depth:-1;
+    select = inv ? -1 : depth;
+    check = inv ? depth : -1;
     ++depth;
     for (i = 0; i < 66432; ++i) {
       if (MEPermPrun[i] === select) {
@@ -134,8 +153,7 @@ function initMCEPermPrun(callback){
             if (inv) {
               MEPermPrun[i] = depth;
               break;
-            }
-             else {
+            } else {
               MEPermPrun[idx] = depth;
               sym = SymState[edgex];
               if (sym != 0) {
@@ -155,7 +173,13 @@ function initMCEPermPrun(callback){
         }
       }
     }
-    callback("MEPermPrun: " + (Math.floor(done * 100 / 66432)) +"% (" + done + "/66432)");
+    callback(
+      "MEPermPrun: " +
+        Math.floor((done * 100) / 66432) +
+        "% (" +
+        done +
+        "/66432)"
+    );
   }
   for (i = 0; i < 66432; ++i) {
     MCPermPrun[i] = -1;
@@ -165,8 +189,8 @@ function initMCEPermPrun(callback){
   done = 1;
   while (done < 66432) {
     inv = depth > 7;
-    select = inv?-1:depth;
-    check = inv?depth:-1;
+    select = inv ? -1 : depth;
+    check = inv ? depth : -1;
     ++depth;
     for (i = 0; i < 66432; ++i) {
       if (MCPermPrun[i] === select) {
@@ -174,7 +198,7 @@ function initMCEPermPrun(callback){
         corn = ~~(i / 24);
         for (m_0 = 0; m_0 < 10; ++m_0) {
           cornx = CPermMove[corn][ud2std[m_0]];
-          symx = (cornx & 15);
+          symx = cornx & 15;
           midx = MPermConj[MPermMove[mid][m_0]][symx];
           cornx = cornx >>> 4;
           idx = cornx * 24 + midx;
@@ -183,15 +207,14 @@ function initMCEPermPrun(callback){
             if (inv) {
               MCPermPrun[i] = depth;
               break;
-            }
-             else {
+            } else {
               MCPermPrun[idx] = depth;
               sym = SymState[cornx];
               if (sym != 0) {
                 for (j = 1; j < 16; ++j) {
                   sym = sym >> 1;
                   if ((sym & 1) === 1) {
-                    idxx = cornx * 24 + MPermConj[midx][j ^ (e2c)[j]];
+                    idxx = cornx * 24 + MPermConj[midx][j ^ e2c[j]];
                     if (MCPermPrun[idxx] === -1) {
                       MCPermPrun[idxx] = depth;
                       ++done;
@@ -204,14 +227,20 @@ function initMCEPermPrun(callback){
         }
       }
     }
-    callback("MCPermPrun: " + (Math.floor(done * 100 / 66432)) +"% (" + done + "/66432)");
+    callback(
+      "MCPermPrun: " +
+        Math.floor((done * 100) / 66432) +
+        "% (" +
+        done +
+        "/66432)"
+    );
   }
 }
 
-function initMPermConj(){
+function initMPermConj() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 24; ++i) {
     $setMPerm(c, i);
     for (j = 0; j < 16; ++j) {
@@ -221,10 +250,10 @@ function initMPermConj(){
   }
 }
 
-function initMPermMove(){
+function initMPermMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 24; ++i) {
     $setMPerm(c, i);
     for (j = 0; j < 10; ++j) {
@@ -234,19 +263,19 @@ function initMPermMove(){
   }
 }
 
-function initMid32MPerm(){
+function initMid32MPerm() {
   var c, i;
-  c = new CubieCube_0;
+  c = new CubieCube_0();
   for (i = 0; i < 24; ++i) {
     $setMPerm(c, i);
     Mid32MPerm[$getMid3(c) % 24] = i;
   }
 }
 
-function initMid3Move(){
+function initMid3Move() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 1320; ++i) {
     $setMid3(c, i);
     for (j = 0; j < 18; ++j) {
@@ -256,30 +285,57 @@ function initMid3Move(){
   }
 }
 
-
-
-function initTwistFlipSlicePrun(callback){
-  var SymState, SymStateF, c, check, d, depth, done, flip, flipx, fsym, fsymx, fsymxx, i, idx, idxx, inv, j, k, m_0, select, slice, slicex, sym, symF, symx, tsymx, twist, twistx;
+function initTwistFlipSlicePrun(callback) {
+  var SymState,
+    SymStateF,
+    c,
+    check,
+    d,
+    depth,
+    done,
+    flip,
+    flipx,
+    fsym,
+    fsymx,
+    fsymxx,
+    i,
+    idx,
+    idxx,
+    inv,
+    j,
+    k,
+    m_0,
+    select,
+    slice,
+    slicex,
+    sym,
+    symF,
+    symx,
+    tsymx,
+    twist,
+    twistx;
   SymState = Array(324);
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 324; ++i) {
     SymState[i] = 0;
     $setTwist(c, TwistS2R[i]);
     for (j = 0; j < 8; ++j) {
       CornMultSym(CubeSym[SymInv[j << 1]], c, temp_0);
       CornMultSym(temp_0, CubeSym[j << 1], d);
-      binarySearch(TwistS2R, $getTwist(d)) != 65535 && (SymState[i] = SymState[i] | (1 << j));
+      binarySearch(TwistS2R, $getTwist(d)) != 65535 &&
+        (SymState[i] = SymState[i] | (1 << j));
     }
   }
   SymStateF = Array(336);
   for (i = 0; i < 336; ++i) {
     SymStateF[i] = 0;
-    $setFlip(c, (FlipS2R)[i]);
+    $setFlip(c, FlipS2R[i]);
     for (j = 0; j < 8; ++j) {
       EdgeMult(CubeSym[SymInv[j << 1]], c, temp_0);
       EdgeMult(temp_0, CubeSym[j << 1], d);
-      binarySearch(FlipS2R, $getFlip(d)) != 65535 && (SymStateF[i] = SymStateF[i] | (1 << j));
+      binarySearch(FlipS2R, $getFlip(d)) != 65535 &&
+        (SymStateF[i] = SymStateF[i] | (1 << j));
     }
   }
   for (i = 0; i < 870912; ++i) {
@@ -292,12 +348,11 @@ function initTwistFlipSlicePrun(callback){
   done = 8;
   while (done < 870912) {
     inv = depth > 6;
-    select = inv?-1:depth;
-    check = inv?depth:-1;
+    select = inv ? -1 : depth;
+    check = inv ? depth : -1;
     ++depth;
     for (i = 0; i < 870912; ++i) {
-      if (TwistFlipPrun[i] != select)
-        continue;
+      if (TwistFlipPrun[i] != select) continue;
       twist = ~~(i / 2688);
       flip = i % 2688;
       fsym = i & 7;
@@ -309,24 +364,24 @@ function initTwistFlipSlicePrun(callback){
         flipx = FlipMove[flip][Sym8Move[fsym][m_0]];
         fsymx = Sym8MultInv[Sym8Mult[flipx & 7][fsym]][tsymx];
         flipx >>>= 3;
-        idx = twistx * 2688 + (flipx << 3 | fsymx);
+        idx = twistx * 2688 + ((flipx << 3) | fsymx);
         if (TwistFlipPrun[idx] === check) {
           ++done;
           if (inv) {
             TwistFlipPrun[i] = depth;
             break;
-          }
-           else {
+          } else {
             TwistFlipPrun[idx] = depth;
             sym = SymState[twistx];
             symF = SymStateF[flipx];
             if (sym != 1 || symF != 1) {
-              for (j = 0; j < 8; ++j , symF = symF >> 1) {
+              for (j = 0; j < 8; ++j, symF = symF >> 1) {
                 if ((symF & 1) === 1) {
                   fsymxx = Sym8MultInv[fsymx][j];
                   for (k = 0; k < 8; ++k) {
-                    if ((sym & 1 << k) != 0) {
-                      idxx = twistx * 2688 + (flipx << 3 | Sym8MultInv[fsymxx][k]);
+                    if ((sym & (1 << k)) != 0) {
+                      idxx =
+                        twistx * 2688 + ((flipx << 3) | Sym8MultInv[fsymxx][k]);
                       if (TwistFlipPrun[idxx] === -1) {
                         TwistFlipPrun[idxx] = depth;
                         ++done;
@@ -340,7 +395,13 @@ function initTwistFlipSlicePrun(callback){
         }
       }
     }
-    callback("TwistFlipPrun: " + (Math.floor(done * 100 / 870912)) +"% (" + done + "/870912)");
+    callback(
+      "TwistFlipPrun: " +
+        Math.floor((done * 100) / 870912) +
+        "% (" +
+        done +
+        "/870912)"
+    );
   }
   for (i = 0; i < 160380; ++i) {
     UDSliceTwistPrun[i] = -1;
@@ -350,8 +411,8 @@ function initTwistFlipSlicePrun(callback){
   done = 1;
   while (done < 160380) {
     inv = depth > 6;
-    select = inv?-1:depth;
-    check = inv?depth:-1;
+    select = inv ? -1 : depth;
+    check = inv ? depth : -1;
     ++depth;
     for (i = 0; i < 160380; ++i) {
       if (UDSliceTwistPrun[i] === select) {
@@ -368,8 +429,7 @@ function initTwistFlipSlicePrun(callback){
             if (inv) {
               UDSliceTwistPrun[i] = depth;
               break;
-            }
-             else {
+            } else {
               UDSliceTwistPrun[idx] = depth;
               sym = SymState[twistx];
               if (sym != 1) {
@@ -389,7 +449,13 @@ function initTwistFlipSlicePrun(callback){
         }
       }
     }
-    callback("UDSliceTwistPrun: " + (Math.floor(done * 100 / 160380)) +"% (" + done + "/160380)");
+    callback(
+      "UDSliceTwistPrun: " +
+        Math.floor((done * 100) / 160380) +
+        "% (" +
+        done +
+        "/160380)"
+    );
   }
   for (i = 0; i < 166320; ++i) {
     UDSliceFlipPrun[i] = -1;
@@ -399,8 +465,8 @@ function initTwistFlipSlicePrun(callback){
   done = 1;
   while (done < 166320) {
     inv = depth > 6;
-    select = inv?-1:depth;
-    check = inv?depth:-1;
+    select = inv ? -1 : depth;
+    check = inv ? depth : -1;
     ++depth;
     for (i = 0; i < 166320; ++i) {
       if (UDSliceFlipPrun[i] === select) {
@@ -417,8 +483,7 @@ function initTwistFlipSlicePrun(callback){
             if (inv) {
               UDSliceFlipPrun[i] = depth;
               break;
-            }
-             else {
+            } else {
               UDSliceFlipPrun[idx] = depth;
               sym = SymStateF[flipx];
               if (sym != 1) {
@@ -438,14 +503,20 @@ function initTwistFlipSlicePrun(callback){
         }
       }
     }
-    callback("UDSliceFlipPrun: " + (Math.floor(done * 100 / 166320)) +"% (" + done + "/166320)");
+    callback(
+      "UDSliceFlipPrun: " +
+        Math.floor((done * 100) / 166320) +
+        "% (" +
+        done +
+        "/166320)"
+    );
   }
 }
 
-function initTwistMove(){
+function initTwistMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 324; ++i) {
     $setTwist(c, TwistS2R[i]);
     for (j = 0; j < 18; ++j) {
@@ -455,23 +526,23 @@ function initTwistMove(){
   }
 }
 
-function initUDSliceConj(){
+function initUDSliceConj() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 495; ++i) {
     $setUDSlice(c, i);
     for (j = 0; j < 16; j = j + 2) {
-      EdgeConjugate(c, (SymInv)[j], d);
+      EdgeConjugate(c, SymInv[j], d);
       UDSliceConj[i][j >>> 1] = $getUDSlice(d);
     }
   }
 }
 
-function initUDSliceMove(){
+function initUDSliceMove() {
   var c, d, i, j;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   for (i = 0; i < 495; ++i) {
     $setUDSlice(c, i);
     for (j = 0; j < 18; ++j) {
@@ -481,10 +552,25 @@ function initUDSliceMove(){
   }
 }
 
-var CParity, CPermMove, EPermMove, FlipMove, MCPermPrun, MEPermPrun, MPermConj, MPermMove, Mid32MPerm, Mid3Move, TwistFlipPrun, TwistMove, UDSliceConj, UDSliceFlipPrun, UDSliceMove, UDSliceTwistPrun;
-function $clinit_CubieCube(){
+var CParity,
+  CPermMove,
+  EPermMove,
+  FlipMove,
+  MCPermPrun,
+  MEPermPrun,
+  MPermConj,
+  MPermMove,
+  Mid32MPerm,
+  Mid3Move,
+  TwistFlipPrun,
+  TwistMove,
+  UDSliceConj,
+  UDSliceFlipPrun,
+  UDSliceMove,
+  UDSliceTwistPrun;
+function $clinit_CubieCube() {
   $clinit_CubieCube = nullMethod;
-  temp_0 = new CubieCube_0;
+  temp_0 = new CubieCube_0();
   CubeSym = Array(16);
   SymInv = Array(16);
   SymMult = createArray(16, 16);
@@ -502,19 +588,26 @@ function $clinit_CubieCube(){
   e2c = [0, 0, 0, 0, 1, 3, 1, 3, 1, 3, 1, 3, 0, 0, 0, 0];
   urf1 = new CubieCube_2(2531, 1373, 67026819, 1877);
   urf2 = new CubieCube_2(2089, 1906, 322752913, 255);
-  urfMove = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [6, 7, 8, 0, 1, 2, 3, 4, 5, 15, 16, 17, 9, 10, 11, 12, 13, 14], [3, 4, 5, 6, 7, 8, 0, 1, 2, 12, 13, 14, 15, 16, 17, 9, 10, 11], [2, 1, 0, 5, 4, 3, 8, 7, 6, 11, 10, 9, 14, 13, 12, 17, 16, 15], [8, 7, 6, 2, 1, 0, 5, 4, 3, 17, 16, 15, 11, 10, 9, 14, 13, 12], [5, 4, 3, 8, 7, 6, 2, 1, 0, 14, 13, 12, 17, 16, 15, 11, 10, 9]];
+  urfMove = [
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+    [6, 7, 8, 0, 1, 2, 3, 4, 5, 15, 16, 17, 9, 10, 11, 12, 13, 14],
+    [3, 4, 5, 6, 7, 8, 0, 1, 2, 12, 13, 14, 15, 16, 17, 9, 10, 11],
+    [2, 1, 0, 5, 4, 3, 8, 7, 6, 11, 10, 9, 14, 13, 12, 17, 16, 15],
+    [8, 7, 6, 2, 1, 0, 5, 4, 3, 17, 16, 15, 11, 10, 9, 14, 13, 12],
+    [5, 4, 3, 8, 7, 6, 2, 1, 0, 14, 13, 12, 17, 16, 15, 11, 10, 9],
+  ];
   initMove();
   initSym();
 }
 
-function $$init(obj){
+function $$init(obj) {
   obj.cp = [0, 1, 2, 3, 4, 5, 6, 7];
   obj.co = [0, 0, 0, 0, 0, 0, 0, 0];
   obj.ep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   obj.eo = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 }
 
-function $copy(obj, c){
+function $copy(obj, c) {
   var i;
   for (i = 0; i < 8; ++i) {
     obj.cp[i] = c.cp[i];
@@ -526,24 +619,24 @@ function $copy(obj, c){
   }
 }
 
-function $getCPermSym(obj){
+function $getCPermSym(obj) {
   var idx, k;
   if (EPermR2S != null) {
     idx = EPermR2S[get8Perm(obj.cp)];
-    idx = (idx ^ e2c[idx & 15]);
+    idx = idx ^ e2c[idx & 15];
     return idx;
   }
   for (k = 0; k < 16; ++k) {
     CornConjugate(obj, SymInv[k], obj.temps);
     idx = binarySearch(CPermS2R, get8Perm(obj.temps.cp));
     if (idx != 65535) {
-      return (idx << 4 | k);
+      return (idx << 4) | k;
     }
   }
   return 0;
 }
 
-function $getDRtoDL(obj){
+function $getDRtoDL(obj) {
   var i, idxA, idxB, mask, r, t;
   idxA = 0;
   idxB = 0;
@@ -551,16 +644,16 @@ function $getDRtoDL(obj){
   r = 3;
   for (i = 11; i >= 0; --i) {
     if (4 <= obj.ep[i] && obj.ep[i] <= 6) {
-      idxA = idxA + (Cnk)[i][r--];
+      idxA = idxA + Cnk[i][r--];
       t = 1 << obj.ep[i];
-      idxB = idxB + bitCount(mask & t - 1) * fact[2 - r];
-      mask = (mask | t);
+      idxB = idxB + bitCount(mask & (t - 1)) * fact[2 - r];
+      mask = mask | t;
     }
   }
   return idxA * 6 + idxB;
 }
 
-function $getEPermSym(obj){
+function $getEPermSym(obj) {
   var idx, k;
   if (EPermR2S != null) {
     return EPermR2S[get8Perm(obj.ep)];
@@ -569,34 +662,34 @@ function $getEPermSym(obj){
     EdgeConjugate(obj, SymInv[k], obj.temps);
     idx = binarySearch(EPermS2R, get8Perm(obj.temps.ep));
     if (idx != 65535) {
-      return (idx << 4 | k);
+      return (idx << 4) | k;
     }
   }
   return 0;
 }
 
-function $getEdgePerm(obj){
+function $getEdgePerm(obj) {
   var i, idx, m_0, t;
   m_0 = 1 << obj.ep[11];
   idx = 0;
   for (i = 10; i >= 0; --i) {
     t = 1 << obj.ep[i];
-    idx += bitCount(m_0 & t - 1) * (fact)[11 - i];
+    idx += bitCount(m_0 & (t - 1)) * fact[11 - i];
     m_0 |= t;
   }
   return idx;
 }
 
-function $getFlip(obj){
+function $getFlip(obj) {
   var i, idx;
   idx = 0;
   for (i = 0; i < 11; ++i) {
-    idx = (idx | obj.eo[i] << i);
+    idx = idx | (obj.eo[i] << i);
   }
   return idx;
 }
 
-function $getFlipSym(obj){
+function $getFlipSym(obj) {
   var idx, k;
   if (FlipR2S != null) {
     return FlipR2S[$getFlip(obj)];
@@ -605,25 +698,25 @@ function $getFlipSym(obj){
     EdgeConjugate(obj, SymInv[k], obj.temps);
     idx = binarySearch(FlipS2R, $getFlip(obj.temps));
     if (idx != 65535) {
-      return (idx << 3 | k >>> 1);
+      return (idx << 3) | (k >>> 1);
     }
   }
   return 0;
 }
 
-function $getMPerm(obj){
+function $getMPerm(obj) {
   var i, idx, m_0, t;
   m_0 = 1 << obj.ep[11];
   idx = 0;
   for (i = 10; i >= 8; --i) {
     t = 1 << obj.ep[i];
-    idx += bitCount(m_0 & t - 1) * (fact)[11 - i];
+    idx += bitCount(m_0 & (t - 1)) * fact[11 - i];
     m_0 |= t;
   }
   return idx;
 }
 
-function $getMid3(obj){
+function $getMid3(obj) {
   var i, idxA, idxB, mask, r, t;
   idxA = 0;
   idxB = 0;
@@ -631,16 +724,16 @@ function $getMid3(obj){
   r = 3;
   for (i = 11; i >= 0; --i) {
     if (obj.ep[i] >= 9) {
-      idxA = idxA + (Cnk)[i][r--];
+      idxA = idxA + Cnk[i][r--];
       t = 1 << obj.ep[i];
-      idxB = idxB + bitCount(mask & t - 1) * fact[2 - r];
-      mask = (mask | t);
+      idxB = idxB + bitCount(mask & (t - 1)) * fact[2 - r];
+      mask = mask | t;
     }
   }
   return idxA * 6 + idxB;
 }
 
-function $getTwist(obj){
+function $getTwist(obj) {
   var i, idx;
   idx = 0;
   for (i = 0; i < 7; ++i) {
@@ -650,7 +743,7 @@ function $getTwist(obj){
   return idx;
 }
 
-function $getTwistSym(obj){
+function $getTwistSym(obj) {
   var idx, k;
   if (TwistR2S != null) {
     return TwistR2S[$getTwist(obj)];
@@ -660,23 +753,23 @@ function $getTwistSym(obj){
     idx = $getTwist(obj.temps);
     idx = binarySearch(TwistS2R, idx);
     if (idx != 65535) {
-      return (idx << 3 | k >>> 1);
+      return (idx << 3) | (k >>> 1);
     }
   }
   return 0;
 }
 
-function $getUDSlice(obj){
+function $getUDSlice(obj) {
   var i, idx, r;
   idx = 0;
   r = 4;
   for (i = 0; i < 12; ++i) {
-    obj.ep[i] >= 8 && (idx = idx + (Cnk)[11 - i][r--]);
+    obj.ep[i] >= 8 && (idx = idx + Cnk[11 - i][r--]);
   }
   return idx;
 }
 
-function $getURtoUL(obj){
+function $getURtoUL(obj) {
   var i, idxA, idxB, mask, r, t;
   idxA = 0;
   idxB = 0;
@@ -684,23 +777,21 @@ function $getURtoUL(obj){
   r = 3;
   for (i = 11; i >= 0; --i) {
     if (obj.ep[i] <= 2) {
-      idxA = idxA + (Cnk)[i][r--];
+      idxA = idxA + Cnk[i][r--];
       t = 1 << obj.ep[i];
-      idxB = idxB + bitCount(mask & t - 1) * fact[2 - r];
-      mask = (mask | t);
+      idxB = idxB + bitCount(mask & (t - 1)) * fact[2 - r];
+      mask = mask | t;
     }
   }
   return idxA * 6 + idxB;
 }
 
-function $invCubieCube(obj){
+function $invCubieCube(obj) {
   var corn, edge, ori;
-  for (edge = 0; edge < 12; ++edge)
-    obj.temps.ep[obj.ep[edge]] = edge;
+  for (edge = 0; edge < 12; ++edge) obj.temps.ep[obj.ep[edge]] = edge;
   for (edge = 0; edge < 12; ++edge)
     obj.temps.eo[edge] = obj.eo[obj.temps.ep[edge]];
-  for (corn = 0; corn < 8; ++corn)
-    obj.temps.cp[obj.cp[corn]] = corn;
+  for (corn = 0; corn < 8; ++corn) obj.temps.cp[obj.cp[corn]] = corn;
   for (corn = 0; corn < 8; ++corn) {
     ori = obj.co[obj.temps.cp[corn]];
     obj.temps.co[corn] = -ori;
@@ -709,7 +800,7 @@ function $invCubieCube(obj){
   $copy(obj, obj.temps);
 }
 
-function $setEdgePerm(obj, idx){
+function $setEdgePerm(obj, idx) {
   var i, j;
   obj.ep[11] = 0;
   for (i = 10; i >= 0; --i) {
@@ -721,20 +812,20 @@ function $setEdgePerm(obj, idx){
   }
 }
 
-function $setFlip(obj, idx){
+function $setFlip(obj, idx) {
   var i;
   obj.eo[11] = bitOdd(idx);
   for (i = 0; i < 11; ++i) {
-    obj.eo[i] = (idx & 1);
+    obj.eo[i] = idx & 1;
     idx = idx >>> 1;
   }
 }
 
-function $setMPerm(obj, idx){
+function $setMPerm(obj, idx) {
   var i, j;
   obj.ep[11] = 8;
   for (i = 10; i >= 8; --i) {
-    obj.ep[i] = idx % (12 - i) + 8;
+    obj.ep[i] = (idx % (12 - i)) + 8;
     idx = ~~(idx / (12 - i));
     for (j = i + 1; j < 12; ++j) {
       obj.ep[j] >= obj.ep[i] && ++obj.ep[j];
@@ -742,23 +833,22 @@ function $setMPerm(obj, idx){
   }
 }
 
-function $setMid3(obj, idxA){
+function $setMid3(obj, idxA) {
   var edge, i, r;
-  edge = (perm3)[idxA % 6];
+  edge = perm3[idxA % 6];
   idxA = ~~(idxA / 6);
   r = 3;
   for (i = 11; i >= 0; --i) {
     if (idxA >= Cnk[i][r]) {
       idxA = idxA - Cnk[i][r--];
       obj.ep[i] = edge[2 - r];
-    }
-     else {
+    } else {
       obj.ep[i] = 8 - i + r;
     }
   }
 }
 
-function $setTwist(obj, idx){
+function $setTwist(obj, idx) {
   var i, twst;
   twst = 0;
   for (i = 6; i >= 0; --i) {
@@ -768,53 +858,44 @@ function $setTwist(obj, idx){
   obj.co[7] = (15 - twst) % 3;
 }
 
-function $setUDSlice(obj, idx){
+function $setUDSlice(obj, idx) {
   var i, r;
   r = 4;
   for (i = 0; i < 12; ++i) {
-    if (idx >= (Cnk)[11 - i][r]) {
+    if (idx >= Cnk[11 - i][r]) {
       idx = idx - Cnk[11 - i][r--];
       obj.ep[i] = 11 - r;
-    }
-     else {
+    } else {
       obj.ep[i] = i + r - 4;
     }
   }
 }
 
-function $verify(obj){
+function $verify(obj) {
   var c, cornMask, e, edgeMask, i, sum;
   sum = 0;
   edgeMask = 0;
-  for (e = 0; e < 12; ++e)
-    edgeMask = (edgeMask | 1 << obj.ep[e]);
-  if (edgeMask != 4095)
-    return -2;
-  for (i = 0; i < 12; ++i)
-    sum = sum ^ obj.eo[i];
-  if (sum % 2 != 0)
-    return -3;
+  for (e = 0; e < 12; ++e) edgeMask = edgeMask | (1 << obj.ep[e]);
+  if (edgeMask != 4095) return -2;
+  for (i = 0; i < 12; ++i) sum = sum ^ obj.eo[i];
+  if (sum % 2 != 0) return -3;
   cornMask = 0;
-  for (c = 0; c < 8; ++c)
-    cornMask = (cornMask | 1 << obj.cp[c]);
-  if (cornMask != 255)
-    return -4;
+  for (c = 0; c < 8; ++c) cornMask = cornMask | (1 << obj.cp[c]);
+  if (cornMask != 255) return -4;
   sum = 0;
-  for (i = 0; i < 8; ++i)
-    sum = sum + obj.co[i];
-  if (sum % 3 != 0)
-    return -5;
+  for (i = 0; i < 8; ++i) sum = sum + obj.co[i];
+  if (sum % 3 != 0) return -5;
   if ((get12Parity($getEdgePerm(obj)) ^ get8Parity(get8Perm(obj.cp))) != 0)
     return -6;
   return 0;
 }
 
-function CornConjugate(a, idx, b){
+function CornConjugate(a, idx, b) {
   CornMultSym(CubeSym[SymInv[idx]], a, temp_0);
   CornMultSym(temp_0, CubeSym[idx], b);
 }
 
-function CornMult(a, b, prod){
+function CornMult(a, b, prod) {
   var corn;
   for (corn = 0; corn < 8; ++corn) {
     prod.cp[corn] = a.cp[b.cp[corn]];
@@ -822,25 +903,25 @@ function CornMult(a, b, prod){
   }
 }
 
-function CornMultSym(a, b, prod){
+function CornMultSym(a, b, prod) {
   var corn, ori, oriA, oriB;
   for (corn = 0; corn < 8; ++corn) {
     prod.cp[corn] = a.cp[b.cp[corn]];
     oriA = a.co[b.cp[corn]];
     oriB = b.co[corn];
     ori = oriA;
-    ori = ori + (oriA < 3?oriB:3 - oriB);
+    ori = ori + (oriA < 3 ? oriB : 3 - oriB);
     ori = ori % 3;
-    oriA < 3 ^ oriB < 3 && (ori = ori + 3);
+    (oriA < 3) ^ (oriB < 3) && (ori = ori + 3);
     prod.co[corn] = ori;
   }
 }
 
-function CubieCube_0(){
+function CubieCube_0() {
   $$init(this);
 }
 
-function CubieCube_1(cp, co, ep, eo){
+function CubieCube_1(cp, co, ep, eo) {
   var i;
   $$init(this);
   for (i = 0; i < 8; ++i) {
@@ -853,7 +934,7 @@ function CubieCube_1(cp, co, ep, eo){
   }
 }
 
-function CubieCube_2(cperm, twist, eperm, flip){
+function CubieCube_2(cperm, twist, eperm, flip) {
   $$init(this);
   set8Perm(this.cp, cperm);
   $setTwist(this, twist);
@@ -861,43 +942,50 @@ function CubieCube_2(cperm, twist, eperm, flip){
   $setFlip(this, flip);
 }
 
-function CubieCube_3(c){
+function CubieCube_3(c) {
   CubieCube_1.call(this, c.cp, c.co, c.ep, c.eo);
 }
 
-function EdgeConjugate(a, idx, b){
+function EdgeConjugate(a, idx, b) {
   EdgeMult(CubeSym[SymInv[idx]], a, temp_0);
   EdgeMult(temp_0, CubeSym[idx], b);
 }
 
-function EdgeMult(a, b, prod){
+function EdgeMult(a, b, prod) {
   var ed;
   for (ed = 0; ed < 12; ++ed) {
     prod.ep[ed] = a.ep[b.ep[ed]];
-    prod.eo[ed] = (b.eo[ed] ^ a.eo[b.ep[ed]]);
+    prod.eo[ed] = b.eo[ed] ^ a.eo[b.ep[ed]];
   }
 }
 
-function get8Perm(arr){
+function get8Perm(arr) {
   var i, idx, v, val;
   idx = 0;
   val = 1985229328;
   for (i = 0; i < 7; ++i) {
     v = arr[i] << 2;
-    idx = (8 - i) * idx + (val >> v & 7);
+    idx = (8 - i) * idx + ((val >> v) & 7);
     val -= 286331152 << v;
   }
   return idx;
 }
 
-function initMove(){
+function initMove() {
   var m_0, mc, p;
   mc = Array(18);
-  moveCube = [new CubieCube_2(15120, 0, 119750400, 0), new CubieCube_2(21021, 1494, 323403417, 0), new CubieCube_2(8064, 1236, 29441808, 802), new CubieCube_2(9, 0, 5880, 0), new CubieCube_2(1230, 412, 2949660, 0), new CubieCube_2(224, 137, 328552, 1160)];
+  moveCube = [
+    new CubieCube_2(15120, 0, 119750400, 0),
+    new CubieCube_2(21021, 1494, 323403417, 0),
+    new CubieCube_2(8064, 1236, 29441808, 802),
+    new CubieCube_2(9, 0, 5880, 0),
+    new CubieCube_2(1230, 412, 2949660, 0),
+    new CubieCube_2(224, 137, 328552, 1160),
+  ];
   for (m_0 = 0; m_0 < 6; ++m_0) {
     mc[m_0 * 3] = moveCube[m_0];
     for (p = 0; p < 2; ++p) {
-      mc[m_0 * 3 + p + 1] = new CubieCube_0;
+      mc[m_0 * 3 + p + 1] = new CubieCube_0();
       EdgeMult(mc[m_0 * 3 + p], moveCube[m_0], mc[m_0 * 3 + p + 1]);
       CornMult(mc[m_0 * 3 + p], moveCube[m_0], mc[m_0 * 3 + p + 1]);
     }
@@ -905,10 +993,10 @@ function initMove(){
   moveCube = mc;
 }
 
-function initSym(){
+function initSym() {
   var c, d, f2, i, j, k, lr2, m_0, s, temp, u4;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   f2 = new CubieCube_2(28783, 0, 259268407, 0);
   u4 = new CubieCube_2(15138, 0, 119765538, 1792);
   lr2 = new CubieCube_2(5167, 0, 83473207, 0);
@@ -948,7 +1036,11 @@ function initSym(){
     for (j = 0; j < 16; ++j) {
       CornMultSym(CubeSym[i], CubeSym[j], c);
       for (k = 0; k < 16; ++k) {
-        if (CubeSym[k].cp[0] === c.cp[0] && CubeSym[k].cp[1] === c.cp[1] && CubeSym[k].cp[2] === c.cp[2]) {
+        if (
+          CubeSym[k].cp[0] === c.cp[0] &&
+          CubeSym[k].cp[1] === c.cp[1] &&
+          CubeSym[k].cp[2] === c.cp[2]
+        ) {
           SymMult[i][j] = k;
           break;
         }
@@ -960,7 +1052,10 @@ function initSym(){
       CornConjugate(moveCube[j], SymInv[s], c);
       CONTINUE: for (m_0 = 0; m_0 < 18; ++m_0) {
         for (i = 0; i < 8; ++i) {
-          if (c.cp[i] != moveCube[m_0].cp[i] || c.co[i] != moveCube[m_0].co[i]) {
+          if (
+            c.cp[i] != moveCube[m_0].cp[i] ||
+            c.co[i] != moveCube[m_0].co[i]
+          ) {
             continue CONTINUE;
           }
         }
@@ -970,7 +1065,7 @@ function initSym(){
   }
   for (j = 0; j < 10; ++j) {
     for (s = 0; s < 16; ++s) {
-      SymMoveUD[s][j] = (std2ud)[SymMove[s][ud2std[j]]];
+      SymMoveUD[s][j] = std2ud[SymMove[s][ud2std[j]]];
     }
   }
   for (j = 0; j < 8; ++j) {
@@ -990,39 +1085,37 @@ function initSym(){
   }
 }
 
-function initSym2Raw(){
+function initSym2Raw() {
   var a, b, c, count, d, i, idx, j, m_0, mask, occ, s;
-  c = new CubieCube_0;
-  d = new CubieCube_0;
+  c = new CubieCube_0();
+  d = new CubieCube_0();
   occ = Array(1260);
   count = 0;
-  for (i = 0; i < 64; occ[i++] = 0)
-  ;
+  for (i = 0; i < 64; occ[i++] = 0);
   for (i = 0; i < 2048; ++i) {
-    if ((occ[i >>> 5] & 1 << (i & 31)) === 0) {
+    if ((occ[i >>> 5] & (1 << (i & 31))) === 0) {
       $setFlip(c, i);
       for (s = 0; s < 16; s = s + 2) {
         EdgeMult(CubeSym[SymInv[s]], c, temp_0);
         EdgeMult(temp_0, CubeSym[s], d);
         idx = $getFlip(d);
         occ[idx >>> 5] |= 1 << (idx & 31);
-        FlipR2S[idx] = (count << 3 | s >>> 1);
+        FlipR2S[idx] = (count << 3) | (s >>> 1);
       }
       FlipS2R[count++] = i;
     }
   }
   count = 0;
-  for (i = 0; i < 69; occ[i++] = 0)
-  ;
+  for (i = 0; i < 69; occ[i++] = 0);
   for (i = 0; i < 2187; ++i) {
-    if ((occ[i >>> 5] & 1 << (i & 31)) === 0) {
+    if ((occ[i >>> 5] & (1 << (i & 31))) === 0) {
       $setTwist(c, i);
       for (s = 0; s < 16; s = s + 2) {
         CornMultSym(CubeSym[SymInv[s]], c, temp_0);
         CornMultSym(temp_0, CubeSym[s], d);
         idx = $getTwist(d);
         occ[idx >>> 5] |= 1 << (idx & 31);
-        TwistR2S[idx] = (count << 3 | s >>> 1);
+        TwistR2S[idx] = (count << 3) | (s >>> 1);
       }
       TwistS2R[count++] = i;
     }
@@ -1031,26 +1124,25 @@ function initSym2Raw(){
   mask = Array(2);
   mask[0] = Array(56);
   mask[1] = Array(56);
-  for (i=0; i<56; ++i) {
+  for (i = 0; i < 56; ++i) {
     mask[0][i] = mask[1][i] = 0;
   }
   for (i = 0; i < 40320; ++i) {
     set8Perm(c.ep, i);
     a = ~~($getURtoUL(c) / 6);
     b = ~~($getDRtoDL(c) / 6);
-    mask[b>>5][a] |= 1 << (b & 0x1f);
+    mask[b >> 5][a] |= 1 << (b & 0x1f);
   }
   for (i = 0; i < 56; ++i) {
     count = 0;
     for (j = 0; j < 56; ++j) {
-      ((mask[j>>5][i] & (1 << (j & 0x1f))) != 0) && (merge[i][j] = count++);
+      (mask[j >> 5][i] & (1 << (j & 0x1f))) != 0 && (merge[i][j] = count++);
     }
   }
   count = 0;
-  for (i = 0; i < 1260; occ[i++] = 0)
-  ;
+  for (i = 0; i < 1260; occ[i++] = 0);
   for (i = 0; i < 40320; ++i) {
-    if ((occ[i >>> 5] & 1 << (i & 31)) === 0) {
+    if ((occ[i >>> 5] & (1 << (i & 31))) === 0) {
       set8Perm(c.ep, i);
       for (s = 0; s < 16; ++s) {
         EdgeMult(CubeSym[SymInv[s]], c, temp_0);
@@ -1059,41 +1151,66 @@ function initSym2Raw(){
         occ[idx >>> 5] |= 1 << (idx & 31);
         a = $getURtoUL(d);
         b = $getDRtoDL(d);
-        m_0 = merge[~~(a / 6)][~~(b / 6)] * 4032 + a * 12 + b % 6 * 2 + get8Parity(idx);
-        MtoEPerm[m_0] = (count << 4 | s);
-        EPermR2S[idx] = (count << 4 | s);
+        m_0 =
+          merge[~~(a / 6)][~~(b / 6)] * 4032 +
+          a * 12 +
+          (b % 6) * 2 +
+          get8Parity(idx);
+        MtoEPerm[m_0] = (count << 4) | s;
+        EPermR2S[idx] = (count << 4) | s;
       }
       EPermS2R[count++] = i;
     }
   }
 }
 
-function set8Perm(arr, idx){
+function set8Perm(arr, idx) {
   var i, m_0, p, v, val;
   val = 1985229328;
   for (i = 0; i < 7; ++i) {
-    p = (fact)[7 - i];
+    p = fact[7 - i];
     v = ~~(idx / p);
     idx = idx - v * p;
     v <<= 2;
-    arr[i] = (val >> v & 7);
+    arr[i] = (val >> v) & 7;
     m_0 = (1 << v) - 1;
-    val = (val & m_0) + (val >> 4 & ~m_0);
+    val = (val & m_0) + ((val >> 4) & ~m_0);
   }
   arr[7] = val;
 }
 
-function CubieCube(){
-}
+function CubieCube() {}
 
-_ = CubieCube_3.prototype = CubieCube_2.prototype = CubieCube_0.prototype = CubieCube.prototype;
+_ = CubieCube_3.prototype = CubieCube_2.prototype = CubieCube_0.prototype =
+  CubieCube.prototype;
 _.temps = null;
-var CPermS2R, CubeSym, EPermR2S = null, EPermS2R, FlipR2S = null, FlipS2R, MtoEPerm, Sym8Move, Sym8Mult, Sym8MultInv, SymInv, SymMove, SymMoveUD, SymMult, TwistR2S = null, TwistS2R, e2c, merge, moveCube = null, temp_0, urf1, urf2, urfMove;
+var CPermS2R,
+  CubeSym,
+  EPermR2S = null,
+  EPermS2R,
+  FlipR2S = null,
+  FlipS2R,
+  MtoEPerm,
+  Sym8Move,
+  Sym8Mult,
+  Sym8MultInv,
+  SymInv,
+  SymMove,
+  SymMoveUD,
+  SymMult,
+  TwistR2S = null,
+  TwistS2R,
+  e2c,
+  merge,
+  moveCube = null,
+  temp_0,
+  urf1,
+  urf2,
+  urfMove;
 
-
-function $Solve(obj, c){
+function $Solve(obj, c) {
   var i;
-  c.temps = new CubieCube_0;
+  c.temps = new CubieCube_0();
   for (i = 0; i < 6; ++i) {
     obj.twist[i] = $getTwistSym(c);
     obj.tsym[i] = obj.twist[i] & 7;
@@ -1108,7 +1225,20 @@ function $Solve(obj, c){
     obj.mid30[i] = $getMid3(c);
     obj.e10[i] = $getURtoUL(c);
     obj.e20[i] = $getDRtoDL(c);
-    obj.prun[i] = Math.max(Math.max((UDSliceTwistPrun)[obj.twist[i] * 495 + UDSliceConj[obj.slice_0[i]][obj.tsym[i]]], UDSliceFlipPrun[obj.flip[i] * 495 + UDSliceConj[obj.slice_0[i]][obj.fsym[i]]]), TwistFlipPrun[obj.twist[i] * 2688 + (obj.flip[i] << 3 | (Sym8MultInv)[obj.fsym[i]][obj.tsym[i]])]);
+    obj.prun[i] = Math.max(
+      Math.max(
+        UDSliceTwistPrun[
+          obj.twist[i] * 495 + UDSliceConj[obj.slice_0[i]][obj.tsym[i]]
+        ],
+        UDSliceFlipPrun[
+          obj.flip[i] * 495 + UDSliceConj[obj.slice_0[i]][obj.fsym[i]]
+        ]
+      ),
+      TwistFlipPrun[
+        obj.twist[i] * 2688 +
+          ((obj.flip[i] << 3) | Sym8MultInv[obj.fsym[i]][obj.tsym[i]])
+      ]
+    );
     CornMult(urf2, c, c.temps);
     CornMult(c.temps, urf1, c);
     EdgeMult(urf2, c, c.temps);
@@ -1124,27 +1254,42 @@ function $Solve(obj, c){
       obj.mid3[0] = obj.mid30[obj.urfidx];
       obj.e1[0] = obj.e10[obj.urfidx];
       obj.e2[0] = obj.e20[obj.urfidx];
-      if (obj.prun[obj.urfidx] <= obj.length1 && $phase1(obj, obj.twist[obj.urfidx], obj.tsym[obj.urfidx], obj.flip[obj.urfidx], obj.fsym[obj.urfidx], obj.slice_0[obj.urfidx], obj.length1, 18)) {
-        return obj.solution === null?'Error 8':obj.solution;
+      if (
+        obj.prun[obj.urfidx] <= obj.length1 &&
+        $phase1(
+          obj,
+          obj.twist[obj.urfidx],
+          obj.tsym[obj.urfidx],
+          obj.flip[obj.urfidx],
+          obj.fsym[obj.urfidx],
+          obj.slice_0[obj.urfidx],
+          obj.length1,
+          18
+        )
+      ) {
+        return obj.solution === null ? "Error 8" : obj.solution;
       }
     }
   }
-  return 'Error 7';
+  return "Error 7";
 }
 
-function $init2(obj){
+function $init2(obj) {
   var cornx, edge, esym, ex, i, lm, m_0, mid, prun, s, sb, urf;
   obj.valid2 = Math.min(obj.valid2, obj.valid1);
   for (i = obj.valid1; i < obj.length1; ++i) {
     m_0 = obj.move[i];
-    obj.corn[i + 1] = (CPermMove)[obj.corn[i]][(SymMove)[obj.csym[i]][m_0]];
+    obj.corn[i + 1] = CPermMove[obj.corn[i]][SymMove[obj.csym[i]][m_0]];
     obj.csym[i + 1] = SymMult[obj.corn[i + 1] & 15][obj.csym[i]];
     obj.corn[i + 1] >>>= 4;
     obj.mid3[i + 1] = Mid3Move[obj.mid3[i]][m_0];
   }
   obj.valid1 = obj.length1;
-  mid = (Mid32MPerm)[obj.mid3[obj.length1] % 24];
-  prun = MCPermPrun[obj.corn[obj.length1] * 24 + MPermConj[mid][obj.csym[obj.length1]]];
+  mid = Mid32MPerm[obj.mid3[obj.length1] % 24];
+  prun =
+    MCPermPrun[
+      obj.corn[obj.length1] * 24 + MPermConj[mid][obj.csym[obj.length1]]
+    ];
   if (prun >= obj.maxlength2) {
     return false;
   }
@@ -1154,7 +1299,11 @@ function $init2(obj){
   }
   obj.valid2 = obj.length1;
   cornx = obj.corn[obj.length1];
-  ex = (merge)[~~(obj.e1[obj.length1] / 6)][~~(obj.e2[obj.length1] / 6)] * 4032 + obj.e1[obj.length1] * 12 + obj.e2[obj.length1] % 6 * 2 + (CParity[cornx >>> 3] >>> (cornx & 7) & 1 ^ (parity4)[mid]);
+  ex =
+    merge[~~(obj.e1[obj.length1] / 6)][~~(obj.e2[obj.length1] / 6)] * 4032 +
+    obj.e1[obj.length1] * 12 +
+    (obj.e2[obj.length1] % 6) * 2 +
+    (((CParity[cornx >>> 3] >>> (cornx & 7)) & 1) ^ parity4[mid]);
   edge = MtoEPerm[ex];
   esym = edge & 15;
   edge >>>= 4;
@@ -1162,33 +1311,45 @@ function $init2(obj){
   if (prun >= obj.maxlength2) {
     return false;
   }
-  lm = obj.length1 === 0?10:std2ud[~~(obj.move[obj.length1 - 1] / 3) * 3 + 1];
+  lm =
+    obj.length1 === 0 ? 10 : std2ud[~~(obj.move[obj.length1 - 1] / 3) * 3 + 1];
   for (i = prun; i < obj.maxlength2; ++i) {
-    if ($phase2(obj, edge, esym, obj.corn[obj.length1], obj.csym[obj.length1], mid, i, obj.length1, lm)) {
+    if (
+      $phase2(
+        obj,
+        edge,
+        esym,
+        obj.corn[obj.length1],
+        obj.csym[obj.length1],
+        mid,
+        i,
+        obj.length1,
+        lm
+      )
+    ) {
       obj.sol = obj.length1 + i;
       sb = "";
       urf = obj.urfidx;
-      (urf = (urf + 3) % 6);
+      urf = (urf + 3) % 6;
       if (urf < 3) {
         for (s = 0; s < obj.length1; ++s) {
           sb += move2str[urfMove[urf][obj.move[s]]];
-          sb += ' ';
+          sb += " ";
         }
-        obj.useSeparator && (sb.impl.string += '.' , sb);
+        obj.useSeparator && ((sb.impl.string += "."), sb);
         for (s = obj.length1; s < obj.sol; ++s) {
           sb += move2str[urfMove[urf][obj.move[s]]];
-          sb += ' ';
+          sb += " ";
         }
-      }
-       else {
+      } else {
         for (s = obj.sol - 1; s >= obj.length1; --s) {
           sb += move2str[urfMove[urf][obj.move[s]]];
-          sb += ' ';
+          sb += " ";
         }
-        obj.useSeparator && (sb += '.' , sb);
+        obj.useSeparator && ((sb += "."), sb);
         for (s = obj.length1 - 1; s >= 0; --s) {
           sb += move2str[urfMove[urf][obj.move[s]]];
-          sb += ' ';
+          sb += " ";
         }
       }
       obj.solution = sb;
@@ -1198,17 +1359,17 @@ function $init2(obj){
   return false;
 }
 
-function $phase1(obj, twist, tsym, flip, fsym, slice, maxl, lm){
+function $phase1(obj, twist, tsym, flip, fsym, slice, maxl, lm) {
   var flipx, fsymx, m_0, slicex, tsymx, twistx;
   if (twist === 0 && flip === 0 && slice === 0 && maxl < 5) {
     return maxl === 0 && $init2(obj);
   }
   for (m_0 = 0; m_0 < 18; ++m_0) {
-    if ((ckmv)[lm][m_0]) {
+    if (ckmv[lm][m_0]) {
       m_0 += 2;
       continue;
     }
-    slicex = (UDSliceMove)[slice][m_0];
+    slicex = UDSliceMove[slice][m_0];
     twistx = TwistMove[twist][Sym8Move[tsym][m_0]];
     tsymx = Sym8Mult[twistx & 7][tsym];
     twistx >>>= 3;
@@ -1218,7 +1379,12 @@ function $phase1(obj, twist, tsym, flip, fsym, slice, maxl, lm){
     flipx = FlipMove[flip][Sym8Move[fsym][m_0]];
     fsymx = Sym8Mult[flipx & 7][fsym];
     flipx >>>= 3;
-    if (TwistFlipPrun[twistx * 2688 + (flipx << 3 | Sym8MultInv[fsymx][tsymx])] >= maxl || UDSliceFlipPrun[flipx * 495 + UDSliceConj[slicex][fsymx]] >= maxl) {
+    if (
+      TwistFlipPrun[
+        twistx * 2688 + ((flipx << 3) | Sym8MultInv[fsymx][tsymx])
+      ] >= maxl ||
+      UDSliceFlipPrun[flipx * 495 + UDSliceConj[slicex][fsymx]] >= maxl
+    ) {
       continue;
     }
     obj.move[obj.length1 - maxl] = m_0;
@@ -1230,17 +1396,17 @@ function $phase1(obj, twist, tsym, flip, fsym, slice, maxl, lm){
   return false;
 }
 
-function $phase2(obj, edge, esym, corn, csym, mid, maxl, depth, lm){
+function $phase2(obj, edge, esym, corn, csym, mid, maxl, depth, lm) {
   var cornx, csymx, edgex, esymx, m_0, midx;
   if (edge === 0 && corn === 0 && mid === 0) {
     return true;
   }
   for (m_0 = 0; m_0 < 10; ++m_0) {
-    if ((ckmv2)[lm][m_0]) {
+    if (ckmv2[lm][m_0]) {
       continue;
     }
-    midx = (MPermMove)[mid][m_0];
-    edgex = EPermMove[edge][(SymMoveUD)[esym][m_0]];
+    midx = MPermMove[mid][m_0];
+    edgex = EPermMove[edge][SymMoveUD[esym][m_0]];
     esymx = SymMult[edgex & 15][esym];
     edgex >>>= 4;
     if (MEPermPrun[edgex * 24 + MPermConj[midx][esymx]] >= maxl) {
@@ -1253,45 +1419,48 @@ function $phase2(obj, edge, esym, corn, csym, mid, maxl, depth, lm){
       continue;
     }
     obj.move[depth] = ud2std[m_0];
-    if ($phase2(obj, edgex, esymx, cornx, csymx, midx, maxl - 1, depth + 1, m_0)) {
+    if (
+      $phase2(obj, edgex, esymx, cornx, csymx, midx, maxl - 1, depth + 1, m_0)
+    ) {
       return true;
     }
   }
   return false;
 }
 
-function $solution(obj, facelets){
+function $solution(obj, facelets) {
   var $e0, cc, i, s;
   init_0();
-    for (i = 0; i < 54; ++i) {
-      switch (facelets.charCodeAt(i)) {
-        case 85:
-          obj.f[i] = 0;
-          break;
-        case 82:
-          obj.f[i] = 1;
-          break;
-        case 70:
-          obj.f[i] = 2;
-          break;
-        case 68:
-          obj.f[i] = 3;
-          break;
-        case 76:
-          obj.f[i] = 4;
-          break;
-        case 66:
-          obj.f[i] = 5;
-          break;
-        default:return 'Error 1';
-      }
+  for (i = 0; i < 54; ++i) {
+    switch (facelets.charCodeAt(i)) {
+      case 85:
+        obj.f[i] = 0;
+        break;
+      case 82:
+        obj.f[i] = 1;
+        break;
+      case 70:
+        obj.f[i] = 2;
+        break;
+      case 68:
+        obj.f[i] = 3;
+        break;
+      case 76:
+        obj.f[i] = 4;
+        break;
+      case 66:
+        obj.f[i] = 5;
+        break;
+      default:
+        return "Error 1";
     }
+  }
   cc = toCubieCube(obj.f);
   obj.sol = 22;
   return $Solve(obj, cc);
 }
 
-function Search(){
+function Search() {
   this.move = Array(31);
   this.corn = Array(20);
   this.csym = Array(20);
@@ -1324,9 +1493,8 @@ _.useSeparator = false;
 _.valid1 = 0;
 _.valid2 = 0;
 
-function init_0(safeStatusCallback){
-  if (inited)
-    return;
+function init_0(safeStatusCallback) {
+  if (inited) return;
   $clinit_Util();
   safeStatusCallback("[0/9] Initializing Cubie Cube...");
   $clinit_CubieCube();
@@ -1364,28 +1532,113 @@ function init_0(safeStatusCallback){
 }
 
 var inited = false;
-function $clinit_Util(){
+function $clinit_Util() {
   $clinit_Util = nullMethod;
   var i, j;
-  cornerFacelet = [[8, 9, 20], [6, 18, 38], [0, 36, 47], [2, 45, 11], [29, 26, 15], [27, 44, 24], [33, 53, 42], [35, 17, 51]];
-  edgeFacelet = [[5, 10], [7, 19], [3, 37], [1, 46], [32, 16], [28, 25], [30, 43], [34, 52], [23, 12], [21, 41], [50, 39], [48, 14]];
-  cornerColor = [[0, 1, 2], [0, 2, 4], [0, 4, 5], [0, 5, 1], [3, 2, 1], [3, 4, 2], [3, 5, 4], [3, 1, 5]];
-  edgeColor = [[0, 1], [0, 2], [0, 4], [0, 5], [3, 1], [3, 2], [3, 4], [3, 5], [2, 1], [2, 4], [5, 4], [5, 1]];
+  cornerFacelet = [
+    [8, 9, 20],
+    [6, 18, 38],
+    [0, 36, 47],
+    [2, 45, 11],
+    [29, 26, 15],
+    [27, 44, 24],
+    [33, 53, 42],
+    [35, 17, 51],
+  ];
+  edgeFacelet = [
+    [5, 10],
+    [7, 19],
+    [3, 37],
+    [1, 46],
+    [32, 16],
+    [28, 25],
+    [30, 43],
+    [34, 52],
+    [23, 12],
+    [21, 41],
+    [50, 39],
+    [48, 14],
+  ];
+  cornerColor = [
+    [0, 1, 2],
+    [0, 2, 4],
+    [0, 4, 5],
+    [0, 5, 1],
+    [3, 2, 1],
+    [3, 4, 2],
+    [3, 5, 4],
+    [3, 1, 5],
+  ];
+  edgeColor = [
+    [0, 1],
+    [0, 2],
+    [0, 4],
+    [0, 5],
+    [3, 1],
+    [3, 2],
+    [3, 4],
+    [3, 5],
+    [2, 1],
+    [2, 4],
+    [5, 4],
+    [5, 1],
+  ];
   Cnk = createArray(12, 12);
-  fact = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600];
-  move2str = ['U ', 'U2', "U'", 'R ', 'R2', "R'", 'F ', 'F2', "F'", 'D ', 'D2', "D'", 'L ', 'L2', "L'", 'B ', 'B2', "B'"];
+  fact = [
+    1,
+    1,
+    2,
+    6,
+    24,
+    120,
+    720,
+    5040,
+    40320,
+    362880,
+    3628800,
+    39916800,
+    479001600,
+  ];
+  move2str = [
+    "U ",
+    "U2",
+    "U'",
+    "R ",
+    "R2",
+    "R'",
+    "F ",
+    "F2",
+    "F'",
+    "D ",
+    "D2",
+    "D'",
+    "L ",
+    "L2",
+    "L'",
+    "B ",
+    "B2",
+    "B'",
+  ];
   ud2std = [0, 1, 2, 4, 7, 9, 10, 11, 13, 16];
   std2ud = Array(18);
   ckmv = createArray(19, 18);
   ckmv2 = createArray(11, 10);
   parity4 = Array(24);
-  perm3 = [[11, 10, 9], [10, 11, 9], [11, 9, 10], [9, 11, 10], [10, 9, 11], [9, 10, 11]];
+  perm3 = [
+    [11, 10, 9],
+    [10, 11, 9],
+    [11, 9, 10],
+    [9, 11, 10],
+    [10, 9, 11],
+    [9, 10, 11],
+  ];
   for (i = 0; i < 10; ++i) {
     std2ud[ud2std[i]] = i;
   }
   for (i = 0; i < 18; ++i) {
     for (j = 0; j < 18; ++j) {
-      ckmv[i][j] = ~~(i / 3) === ~~(j / 3) || ~~(i / 3) % 3 === ~~(j / 3) % 3 && i >= j;
+      ckmv[i][j] =
+        ~~(i / 3) === ~~(j / 3) || (~~(i / 3) % 3 === ~~(j / 3) % 3 && i >= j);
     }
     ckmv[18][i] = false;
   }
@@ -1395,9 +1648,7 @@ function $clinit_Util(){
     }
     ckmv2[10][i] = false;
   }
-  for (i=0; i<12; ++i)
-    for (j=0; j<12; ++j)
-      Cnk[i][j] = 0;
+  for (i = 0; i < 12; ++i) for (j = 0; j < 12; ++j) Cnk[i][j] = 0;
   for (i = 0; i < 12; ++i) {
     Cnk[i][0] = 1;
     Cnk[i][i] = 1;
@@ -1410,22 +1661,20 @@ function $clinit_Util(){
   }
 }
 
-function binarySearch(arr, key){
+function binarySearch(arr, key) {
   var l_0, length_0, mid, r, val;
   length_0 = arr.length;
   if (key <= arr[length_0 - 1]) {
     l_0 = 0;
     r = length_0 - 1;
     while (l_0 <= r) {
-      mid = l_0 + r >>> 1;
+      mid = (l_0 + r) >>> 1;
       val = arr[mid];
       if (key > val) {
         l_0 = mid + 1;
-      }
-       else if (key < val) {
+      } else if (key < val) {
         r = mid - 1;
-      }
-       else {
+      } else {
         return mid;
       }
     }
@@ -1433,60 +1682,58 @@ function binarySearch(arr, key){
   return 65535;
 }
 
-function bitCount(i){
-  i = i - (i >>> 1 & 1431655765);
-  i = (i & 858993459) + (i >>> 2 & 858993459);
-  return i + (i >>> 8) + (i >>> 4) & 15;
+function bitCount(i) {
+  i = i - ((i >>> 1) & 1431655765);
+  i = (i & 858993459) + ((i >>> 2) & 858993459);
+  return (i + (i >>> 8) + (i >>> 4)) & 15;
 }
 
-function bitOdd(i){
-  i = (i ^ i >>> 1);
-  i = (i ^ i >>> 2);
-  i = (i ^ i >>> 4);
-  i = (i ^ i >>> 8);
-  return (i & 1);
+function bitOdd(i) {
+  i = i ^ (i >>> 1);
+  i = i ^ (i >>> 2);
+  i = i ^ (i >>> 4);
+  i = i ^ (i >>> 8);
+  return i & 1;
 }
 
-function get12Parity(idx){
+function get12Parity(idx) {
   var i, p;
   p = 0;
   for (i = 10; i >= 0; --i) {
-    p = p + idx % (12 - i);
+    p = p + (idx % (12 - i));
     idx = ~~(idx / (12 - i));
   }
-  p = (p & 1);
+  p = p & 1;
   return p;
 }
 
-function get4Parity(idx){
+function get4Parity(idx) {
   var i, p;
   p = 0;
   for (i = 2; i >= 0; --i) {
-    p = p + idx % (4 - i);
+    p = p + (idx % (4 - i));
     idx = ~~(idx / (4 - i));
   }
-  p = (p & 1);
+  p = p & 1;
   return p;
 }
 
-function get8Parity(idx){
+function get8Parity(idx) {
   var i, p;
   p = 0;
   for (i = 6; i >= 0; --i) {
-    p = p + idx % (8 - i);
+    p = p + (idx % (8 - i));
     idx = ~~(idx / (8 - i));
   }
-  p = (p & 1);
+  p = p & 1;
   return p;
 }
 
-function toCubieCube(f){
+function toCubieCube(f) {
   var ccRet, col1, col2, i, j, ori;
-  ccRet = new CubieCube_0;
-  for (i = 0; i < 8; ++i)
-    ccRet.cp[i] = 0;
-  for (i = 0; i < 12; ++i)
-    ccRet.ep[i] = 0;
+  ccRet = new CubieCube_0();
+  for (i = 0; i < 8; ++i) ccRet.cp[i] = 0;
+  for (i = 0; i < 12; ++i) ccRet.ep[i] = 0;
   for (i = 0; i < 8; ++i) {
     for (ori = 0; ori < 3; ++ori)
       if (f[cornerFacelet[i][ori]] === 0 || f[cornerFacelet[i][ori]] === 3)
@@ -1503,12 +1750,18 @@ function toCubieCube(f){
   }
   for (i = 0; i < 12; ++i) {
     for (j = 0; j < 12; ++j) {
-      if (f[edgeFacelet[i][0]] === edgeColor[j][0] && f[edgeFacelet[i][1]] === edgeColor[j][1]) {
+      if (
+        f[edgeFacelet[i][0]] === edgeColor[j][0] &&
+        f[edgeFacelet[i][1]] === edgeColor[j][1]
+      ) {
         ccRet.ep[i] = j;
         ccRet.eo[i] = 0;
         break;
       }
-      if (f[edgeFacelet[i][0]] === edgeColor[j][1] && f[edgeFacelet[i][1]] === edgeColor[j][0]) {
+      if (
+        f[edgeFacelet[i][0]] === edgeColor[j][1] &&
+        f[edgeFacelet[i][1]] === edgeColor[j][0]
+      ) {
         ccRet.ep[i] = j;
         ccRet.eo[i] = 1;
         break;
@@ -1518,7 +1771,7 @@ function toCubieCube(f){
   return ccRet;
 }
 
-function toFaceCube(cc){
+function toFaceCube(cc) {
   var c, e, f, i, j, n, ori, ts;
   f = Array(54);
   ts = [85, 82, 70, 68, 76, 66];
@@ -1540,141 +1793,190 @@ function toFaceCube(cc){
   return String.fromCharCode.apply(null, f);
 }
 
-var Cnk, ckmv, ckmv2, cornerColor, cornerFacelet, edgeColor, edgeFacelet, fact, move2str, parity4, perm3, std2ud, ud2std;
-
+var Cnk,
+  ckmv,
+  ckmv2,
+  cornerColor,
+  cornerFacelet,
+  edgeColor,
+  edgeFacelet,
+  fact,
+  move2str,
+  parity4,
+  perm3,
+  std2ud,
+  ud2std;
 
 /* Methods added by Lucas. */
-
 
 var randomSource = undefined;
 
 // If we have a better (P)RNG:
-var setRandomSource = function(src) {
+var setRandomSource = function (src) {
   randomSource = src;
-}
+};
 
 var initialized = false;
 
-var ini = function(callback, iniRandomSource, statusCallback) {
-
+var ini = function (callback, iniRandomSource, statusCallback) {
   if (typeof statusCallback !== "function") {
-    statusCallback = function() {};
+    statusCallback = function () {};
   }
 
   if (!initialized) {
-    search = new Search;
+    search = new Search();
     init_0(statusCallback);
     setRandomSource(iniRandomSource);
     initialized = true;
   }
-  if(callback) setTimeout(callback, 0);
+  if (callback) setTimeout(callback, 0);
 };
-
 
 // SCRAMBLERS
 
-var rn = function(n) {
+var rn = function (n) {
   return Math.floor(randomSource.random() * n);
-}
-var permConvert = function(arr) {
+};
+var permConvert = function (arr) {
   // arr contains array e.g. [0,1,2,4,3]
   var deltaArr = [];
-  for (var i=1; i<arr.length; i++) {
-  var offset = 0;
-for (var j=0; j<i; j++) {
-  if (arr[j] > arr[i]) offset++;
-}
-  deltaArr.push(offset);
+  for (var i = 1; i < arr.length; i++) {
+    var offset = 0;
+    for (var j = 0; j < i; j++) {
+      if (arr[j] > arr[i]) offset++;
+    }
+    deltaArr.push(offset);
   }
   var result = 0;
-  for (var i=arr.length-1; i>0; i--) {
-  result = i * (deltaArr[i-1] + result);
+  for (var i = arr.length - 1; i > 0; i--) {
+    result = i * (deltaArr[i - 1] + result);
   }
   return result;
-}
-var randomizeArr = function(arr, pos) {
+};
+var randomizeArr = function (arr, pos) {
   // randomize elements of arr at positions pos
   var newarr = [];
-  for (var i=0; i<pos.length; i++) {
-  newarr.push(arr[pos[i]]);
+  for (var i = 0; i < pos.length; i++) {
+    newarr.push(arr[pos[i]]);
   }
-  for (var i=0; i<newarr.length; i++) {
-  var rnd = i + rn(newarr.length - i);
-  if (rnd > i) {
-    var tmp = newarr[rnd];
-    newarr[rnd] = newarr[i];
-    newarr[i] = tmp;
+  for (var i = 0; i < newarr.length; i++) {
+    var rnd = i + rn(newarr.length - i);
+    if (rnd > i) {
+      var tmp = newarr[rnd];
+      newarr[rnd] = newarr[i];
+      newarr[i] = tmp;
+    }
   }
-  }
-  for (var i=0; i<pos.length; i++) {
-  arr[pos[i]] = newarr[i];
+  for (var i = 0; i < pos.length; i++) {
+    arr[pos[i]] = newarr[i];
   }
   return arr;
-}
-var customScramble = function(cp, ep, co, eo) {
+};
+var customScramble = function (cp, ep, co, eo) {
   var cperm, eperm, cori, csum, eori, esum;
   do {
-  eperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7,8,9,10,11],ep));
-    cperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7],cp));
+    eperm = permConvert(
+      randomizeArr([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], ep)
+    );
+    cperm = permConvert(randomizeArr([0, 1, 2, 3, 4, 5, 6, 7], cp));
   } while ((get8Parity(cperm) ^ get12Parity(eperm)) != 0);
   do {
     csum = 0;
     cori = 0;
-    for (var i=0; i<co.length; i++) {
+    for (var i = 0; i < co.length; i++) {
       var j = rn(3);
       csum += j;
-      cori += j * Math.pow(3,co[i]);
+      cori += j * Math.pow(3, co[i]);
     }
-  } while (csum%3 != 0);
+  } while (csum % 3 != 0);
   do {
     esum = 0;
     eori = 0;
-    for (var i=0; i<eo.length; i++) {
+    for (var i = 0; i < eo.length; i++) {
       var j = rn(2);
       esum += j;
-      eori += j * Math.pow(2,eo[i]);
+      eori += j * Math.pow(2, eo[i]);
     }
-  } while (esum%2 != 0);
-  var posit = toFaceCube(new CubieCube_2(cperm, cori%2187, eperm, eori%2048));
+  } while (esum % 2 != 0);
+  var posit = toFaceCube(
+    new CubieCube_2(cperm, cori % 2187, eperm, eori % 2048)
+  );
   return $solution(search, posit);
-}
-  
-  
+};
 
-
-var getRandomScramble = function() {
-return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11]);
-}
-var getEdgeScramble = function() {
-  return customScramble([],[0,1,2,3,4,5,6,7,8,9,10,11],[],[0,1,2,3,4,5,6,7,8,9,10,11]);
-}
-var getCornerScramble = function() {
-  return customScramble([0,1,2,3,4,5,6,7],[],[0,1,2,3,4,5,6,7],[]);
-}
-var getLLScramble = function() {
-return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[0,1,2,3]);
-}
-var getCMLLScramble = function() {
-return customScramble([4,5,6,7],[4,6,8,9,10,11],[3,4,5,6],[0,1,2,3,5,7]);
-}
-var getLSLLScramble = function() {
-return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[0,1,2,3,8]);
-}
-var getZBLLScramble = function() {
-return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[]);
-}
-var get2GLLScramble = function() {
-return customScramble([],[8,9,10,11],[3,4,5,6],[]);
-}
-var getPLLScramble = function() {
-return customScramble([4,5,6,7],[8,9,10,11],[],[]);
-}
-var getZZLSScramble = function() {
-return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[]);
-}
-var getF2LScramble = function() {
-return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11]);
-}
+var getRandomScramble = function () {
+  return customScramble(
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  );
+};
+var getEdgeScramble = function () {
+  return customScramble(
+    [],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    [],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  );
+};
+var getCornerScramble = function () {
+  return customScramble(
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [],
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    []
+  );
+};
+var getLLScramble = function () {
+  return customScramble(
+    [4, 5, 6, 7],
+    [8, 9, 10, 11],
+    [3, 4, 5, 6],
+    [0, 1, 2, 3]
+  );
+};
+var getCMLLScramble = function () {
+  return customScramble(
+    [4, 5, 6, 7],
+    [4, 6, 8, 9, 10, 11],
+    [3, 4, 5, 6],
+    [0, 1, 2, 3, 5, 7]
+  );
+};
+var getLSLLScramble = function () {
+  return customScramble(
+    [3, 4, 5, 6, 7],
+    [3, 8, 9, 10, 11],
+    [2, 3, 4, 5, 6],
+    [0, 1, 2, 3, 8]
+  );
+};
+var getZBLLScramble = function () {
+  return customScramble([4, 5, 6, 7], [8, 9, 10, 11], [3, 4, 5, 6], []);
+};
+var get2GLLScramble = function () {
+  return customScramble([], [8, 9, 10, 11], [3, 4, 5, 6], []);
+};
+var getPLLScramble = function () {
+  return customScramble([4, 5, 6, 7], [8, 9, 10, 11], [], []);
+};
+var getZZLSScramble = function () {
+  return customScramble(
+    [3, 4, 5, 6, 7],
+    [3, 8, 9, 10, 11],
+    [2, 3, 4, 5, 6],
+    []
+  );
+};
+var getF2LScramble = function () {
+  return customScramble(
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [0, 1, 2, 3, 8, 9, 10, 11],
+    [0, 1, 2, 3, 4, 5, 6, 7],
+    [0, 1, 2, 3, 8, 9, 10, 11]
+  );
+};
 
 export const scramble_333 = {
   /* mark2 interface */
@@ -1693,6 +1995,5 @@ export const scramble_333 = {
   get2GLLScramble: get2GLLScramble,
   getPLLScramble: getPLLScramble,
   getZZLSScramble: getZZLSScramble,
-  getF2LScramble: getF2LScramble
+  getF2LScramble: getF2LScramble,
 };
-

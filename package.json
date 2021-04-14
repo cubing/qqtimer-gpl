@@ -4,7 +4,7 @@
     "clean": "rm -rf ./.parcel-cache ./dist",
     "dev": "npx parcel serve src/index.html --port 1717"
   },
-  "devDependencies":{
-    "parcel":"^2.0.0-nightly.640"
+  "devDependencies": {
+    "parcel": "^2.0.0-nightly.640"
   }
 }
