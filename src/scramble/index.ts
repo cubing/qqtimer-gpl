@@ -1,10 +1,12 @@
-import { $ } from "./dom";
+import { $ } from "../dom";
 import {
   getpyraoptscramble,
   getskewboptscramble,
   scramblers,
   SlidySolver,
 } from "./scramblers";
+
+export { scrdata } from "./scrdata";
 
 // #################### SCRAMBLING ####################
 
@@ -47,6 +49,11 @@ export function clearScramble(): void {
 
 export function getLastScramble(): string {
   return lastscramble;
+}
+
+export function initializeScramblers(): void {
+  scramblers["333"].initialize(null, Math); // hopefully this'll let IE load scramblers
+  scramblers["slidy"] = ["", null];
 }
 
 // Takes a random element of the array x.

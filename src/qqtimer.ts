@@ -1,4 +1,3 @@
-import { scramblers } from "./scramblers";
 import { $, setStyle } from "./dom";
 import {
   getLen,
@@ -9,8 +8,9 @@ import {
   getScramble,
   getLastScramble,
   clearScramble,
-} from "./scrambling";
-import { scrdata } from "./scrdata";
+  initializeScramblers,
+  scrdata,
+} from "./scramble";
 
 type AvgOrMeanWithoutSD =
   | [number, (null | number)[], (null | number)[]]
@@ -173,8 +173,7 @@ export function initialize(lookForTimes, checkQueryString) {
   loadList();
   getStats(true);
 
-  scramblers["333"].initialize(null, Math); // hopefully this'll let IE load scramblers
-  scramblers["slidy"] = ["", null];
+  initializeScramblers();
 
   curTime = new Date(0);
   $<HTMLInputElement>("leng").value = getSelection().toString();
