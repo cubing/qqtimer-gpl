@@ -10,3 +10,7 @@ export function setStyle(style: "0" | "1"): void {
   link.href = styleSource;
   document.body.appendChild(link);
 }
+
+export function $<T extends HTMLElement>(str: string): T {
+  return document.getElementById(str) as T;
+}
