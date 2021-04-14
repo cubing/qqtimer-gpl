@@ -1,3 +1,4 @@
+export { getskewboptscramble } from "./getskewboptscramble";
 import { scramble_333 } from "./scramble_333_edit";
 import { scramble_sq1 } from "./scramble_sq1";
 
