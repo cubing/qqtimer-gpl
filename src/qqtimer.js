@@ -1,3 +1,5 @@
+import { scramblers } from "./scramblers"
+import { setStyle } from "./style"
 
 var startTime;
 var curTime;
@@ -27,8 +29,7 @@ function $(str){return document.getElementById(str);}
 // #################### TIMER STUFF ####################
 
 // deal with styles
-var styleName = "style" + ((a=getCookie("style"))==null?0:a) + ".css";
-document.writeln("<link rel='stylesheet' type='text/css' href='"+styleName+"'>");
+setStyle(getCookie("style"));
 
 // firefox 9.0.1 bugfix
 window.onkeydown = function(event) {checkKey(event.keyCode, event.shiftKey); };
@@ -2398,4 +2399,34 @@ function scramble2222(turnpairs, suffix_a, suffix_b, suffix_x){
     s+=" ";
    }
    ss[0]+=s;
+}
+
+export const globals = {
+  changeAvgN,
+  changeColor,
+  changeMoN,
+  changeNotes,
+  comment,
+  decreaseScrambleSize,
+  decreaseSize,
+  getlastscramble,
+  getSession,
+  importTimes,
+  increaseScrambleSize,
+  increaseSize,
+  rescramble,
+  rescramble2,
+  rescramble3,
+  resetColors,
+  setCookie,
+  toggleAvgN,
+  toggleBld,
+  toggleInput,
+  toggleInspection,
+  toggleMilli,
+  toggleMoN,
+  toggleMono,
+  toggleNightMode,
+  toggleOptions,
+  toggleTimer,
 }

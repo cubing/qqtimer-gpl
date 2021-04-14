@@ -15,10 +15,6 @@ if (typeof scramblers === "undefined") {
   var scramblers = {};
 }
 
-scramblers["333fm"] = scramblers["333ft"] = scramblers["333bf"] = scramblers["333oh"] = scramblers["333"] = (function() {
-
-
-
 function nullMethod(){
 }
 
@@ -1547,162 +1543,156 @@ function toFaceCube(cc){
 var Cnk, ckmv, ckmv2, cornerColor, cornerFacelet, edgeColor, edgeFacelet, fact, move2str, parity4, perm3, std2ud, ud2std;
 
 
+/* Methods added by Lucas. */
 
 
+var randomSource = undefined;
 
+// If we have a better (P)RNG:
+var setRandomSource = function(src) {
+  randomSource = src;
+}
 
-  /* Methods added by Lucas. */
+var initialized = false;
 
+var ini = function(callback, iniRandomSource, statusCallback) {
 
-  var randomSource = undefined;
-
-  // If we have a better (P)RNG:
-  var setRandomSource = function(src) {
-    randomSource = src;
+  if (typeof statusCallback !== "function") {
+    statusCallback = function() {};
   }
 
-  var initialized = false;
-
-  var ini = function(callback, iniRandomSource, statusCallback) {
-
-    if (typeof statusCallback !== "function") {
-      statusCallback = function() {};
-    }
-
-    if (!initialized) {
-      search = new Search;
-      init_0(statusCallback);
-      setRandomSource(iniRandomSource);
-      initialized = true;
-    }
-    if(callback) setTimeout(callback, 0);
-  };
+  if (!initialized) {
+    search = new Search;
+    init_0(statusCallback);
+    setRandomSource(iniRandomSource);
+    initialized = true;
+  }
+  if(callback) setTimeout(callback, 0);
+};
 
 
 // SCRAMBLERS
 
-  var rn = function(n) {
-   return Math.floor(randomSource.random() * n);
+var rn = function(n) {
+  return Math.floor(randomSource.random() * n);
+}
+var permConvert = function(arr) {
+  // arr contains array e.g. [0,1,2,4,3]
+  var deltaArr = [];
+  for (var i=1; i<arr.length; i++) {
+  var offset = 0;
+for (var j=0; j<i; j++) {
+  if (arr[j] > arr[i]) offset++;
+}
+  deltaArr.push(offset);
   }
-  var permConvert = function(arr) {
-   // arr contains array e.g. [0,1,2,4,3]
-   var deltaArr = [];
-   for (var i=1; i<arr.length; i++) {
-    var offset = 0;
-	for (var j=0; j<i; j++) {
-	 if (arr[j] > arr[i]) offset++;
-	}
-    deltaArr.push(offset);
-   }
-   var result = 0;
-   for (var i=arr.length-1; i>0; i--) {
-    result = i * (deltaArr[i-1] + result);
-   }
-   return result;
+  var result = 0;
+  for (var i=arr.length-1; i>0; i--) {
+  result = i * (deltaArr[i-1] + result);
   }
-  var randomizeArr = function(arr, pos) {
-   // randomize elements of arr at positions pos
-   var newarr = [];
-   for (var i=0; i<pos.length; i++) {
-    newarr.push(arr[pos[i]]);
-   }
-   for (var i=0; i<newarr.length; i++) {
-    var rnd = i + rn(newarr.length - i);
-    if (rnd > i) {
-     var tmp = newarr[rnd];
-     newarr[rnd] = newarr[i];
-     newarr[i] = tmp;
+  return result;
+}
+var randomizeArr = function(arr, pos) {
+  // randomize elements of arr at positions pos
+  var newarr = [];
+  for (var i=0; i<pos.length; i++) {
+  newarr.push(arr[pos[i]]);
+  }
+  for (var i=0; i<newarr.length; i++) {
+  var rnd = i + rn(newarr.length - i);
+  if (rnd > i) {
+    var tmp = newarr[rnd];
+    newarr[rnd] = newarr[i];
+    newarr[i] = tmp;
+  }
+  }
+  for (var i=0; i<pos.length; i++) {
+  arr[pos[i]] = newarr[i];
+  }
+  return arr;
+}
+var customScramble = function(cp, ep, co, eo) {
+  var cperm, eperm, cori, csum, eori, esum;
+  do {
+  eperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7,8,9,10,11],ep));
+    cperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7],cp));
+  } while ((get8Parity(cperm) ^ get12Parity(eperm)) != 0);
+  do {
+    csum = 0;
+    cori = 0;
+    for (var i=0; i<co.length; i++) {
+      var j = rn(3);
+      csum += j;
+      cori += j * Math.pow(3,co[i]);
     }
-   }
-   for (var i=0; i<pos.length; i++) {
-    arr[pos[i]] = newarr[i];
-   }
-   return arr;
-  }
-  var customScramble = function(cp, ep, co, eo) {
-    var cperm, eperm, cori, csum, eori, esum;
-    do {
-	  eperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7,8,9,10,11],ep));
-      cperm = permConvert(randomizeArr([0,1,2,3,4,5,6,7],cp));
-    } while ((get8Parity(cperm) ^ get12Parity(eperm)) != 0);
-    do {
-      csum = 0;
-      cori = 0;
-      for (var i=0; i<co.length; i++) {
-        var j = rn(3);
-        csum += j;
-        cori += j * Math.pow(3,co[i]);
-      }
-    } while (csum%3 != 0);
-    do {
-      esum = 0;
-      eori = 0;
-      for (var i=0; i<eo.length; i++) {
-        var j = rn(2);
-        esum += j;
-        eori += j * Math.pow(2,eo[i]);
-      }
-    } while (esum%2 != 0);
-    var posit = toFaceCube(new CubieCube_2(cperm, cori%2187, eperm, eori%2048));
-    return $solution(search, posit);
-  }
-   
-   
+  } while (csum%3 != 0);
+  do {
+    esum = 0;
+    eori = 0;
+    for (var i=0; i<eo.length; i++) {
+      var j = rn(2);
+      esum += j;
+      eori += j * Math.pow(2,eo[i]);
+    }
+  } while (esum%2 != 0);
+  var posit = toFaceCube(new CubieCube_2(cperm, cori%2187, eperm, eori%2048));
+  return $solution(search, posit);
+}
+  
   
 
-  var getRandomScramble = function() {
-	return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11]);
-  }
-  var getEdgeScramble = function() {
-    return customScramble([],[0,1,2,3,4,5,6,7,8,9,10,11],[],[0,1,2,3,4,5,6,7,8,9,10,11]);
-  }
-  var getCornerScramble = function() {
-    return customScramble([0,1,2,3,4,5,6,7],[],[0,1,2,3,4,5,6,7],[]);
-  }
-  var getLLScramble = function() {
-	return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[0,1,2,3]);
-  }
-  var getCMLLScramble = function() {
-	return customScramble([4,5,6,7],[4,6,8,9,10,11],[3,4,5,6],[0,1,2,3,5,7]);
-  }
-  var getLSLLScramble = function() {
-	return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[0,1,2,3,8]);
-  }
-  var getZBLLScramble = function() {
-	return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[]);
-  }
-  var get2GLLScramble = function() {
-	return customScramble([],[8,9,10,11],[3,4,5,6],[]);
-  }
-  var getPLLScramble = function() {
-	return customScramble([4,5,6,7],[8,9,10,11],[],[]);
-  }
-  var getZZLSScramble = function() {
-	return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[]);
-  }
-  var getF2LScramble = function() {
-	return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11]);
-  }
 
-  return {
-    /* mark2 interface */
-    version: "November 22, 2011",
-    initialize: ini,
-    setRandomSource: setRandomSource,
-    getRandomScramble: getRandomScramble,
-    drawScramble: drawScramble,
+var getRandomScramble = function() {
+return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7,8,9,10,11]);
+}
+var getEdgeScramble = function() {
+  return customScramble([],[0,1,2,3,4,5,6,7,8,9,10,11],[],[0,1,2,3,4,5,6,7,8,9,10,11]);
+}
+var getCornerScramble = function() {
+  return customScramble([0,1,2,3,4,5,6,7],[],[0,1,2,3,4,5,6,7],[]);
+}
+var getLLScramble = function() {
+return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[0,1,2,3]);
+}
+var getCMLLScramble = function() {
+return customScramble([4,5,6,7],[4,6,8,9,10,11],[3,4,5,6],[0,1,2,3,5,7]);
+}
+var getLSLLScramble = function() {
+return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[0,1,2,3,8]);
+}
+var getZBLLScramble = function() {
+return customScramble([4,5,6,7],[8,9,10,11],[3,4,5,6],[]);
+}
+var get2GLLScramble = function() {
+return customScramble([],[8,9,10,11],[3,4,5,6],[]);
+}
+var getPLLScramble = function() {
+return customScramble([4,5,6,7],[8,9,10,11],[],[]);
+}
+var getZZLSScramble = function() {
+return customScramble([3,4,5,6,7],[3,8,9,10,11],[2,3,4,5,6],[]);
+}
+var getF2LScramble = function() {
+return customScramble([0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11],[0,1,2,3,4,5,6,7],[0,1,2,3,8,9,10,11]);
+}
 
-    /* added methods */
-    getEdgeScramble: getEdgeScramble,
-    getCornerScramble: getCornerScramble,
-    getLLScramble: getLLScramble,
-	getCMLLScramble: getCMLLScramble,
-    getLSLLScramble: getLSLLScramble,
-	getZBLLScramble: getZBLLScramble,
-	get2GLLScramble: get2GLLScramble,
-	getPLLScramble: getPLLScramble,
-	getZZLSScramble: getZZLSScramble,
-	getF2LScramble: getF2LScramble
-  };
+export const scramble_333 = {
+  /* mark2 interface */
+  version: "November 22, 2011",
+  initialize: ini,
+  setRandomSource: setRandomSource,
+  getRandomScramble: getRandomScramble,
 
-})();
+  /* added methods */
+  getEdgeScramble: getEdgeScramble,
+  getCornerScramble: getCornerScramble,
+  getLLScramble: getLLScramble,
+  getCMLLScramble: getCMLLScramble,
+  getLSLLScramble: getLSLLScramble,
+  getZBLLScramble: getZBLLScramble,
+  get2GLLScramble: get2GLLScramble,
+  getPLLScramble: getPLLScramble,
+  getZZLSScramble: getZZLSScramble,
+  getF2LScramble: getF2LScramble
+};
+

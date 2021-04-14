@@ -13,9 +13,6 @@ if (typeof scramblers === "undefined") {
   var scramblers = {};
 }
 
-scramblers["sq1"] = (function() {
-
-
 function nullMethod(){
 }
 
@@ -722,77 +719,74 @@ function binarySearch(sortedArray, key){
   return -low - 1;
 }
 
-  /*
-   * Some helper functions.
-   */
+/*
+  * Some helper functions.
+  */
 
-  var square1Solver_initialized = false;
+var square1Solver_initialized = false;
 
-  var square1SolverInitialize= function(doneCallback, iniRandomSource, statusCallback) {
+var square1SolverInitialize= function(doneCallback, iniRandomSource, statusCallback) {
 
-    setRandomSource(iniRandomSource);
-    
-    if (!square1Solver_initialized) {
-      Shape_$clinit();
-      Square_$clinit();
-    }
-
-    if (statusCallback) {
-      statusCallback("Done initializing Square-1.");
-    }
-
-    square1Solver_initialized = true;
-    if (doneCallback != null) {
-      doneCallback();
-    }
+  setRandomSource(iniRandomSource);
+  
+  if (!square1Solver_initialized) {
+    Shape_$clinit();
+    Square_$clinit();
   }
 
-  var square1SolverRandomSource = undefined;
-
-  // If we have a better (P)RNG:
-  var setRandomSource = function(src) {
-    square1SolverRandomSource = src;
+  if (statusCallback) {
+    statusCallback("Done initializing Square-1.");
   }
 
-  var square1SolverGetRandomPosition = function() {
-    if (!square1Solver_initialized) {
-      square1SolverInitialize();
-    }
-    return FullCube_randomCube();
+  square1Solver_initialized = true;
+  if (doneCallback != null) {
+    doneCallback();
   }
+}
 
-  var square1SolverGenerate = function(state) {
-    var search_search = new Search_Search; // Can this be factored out?
-    return Search_solution(search_search, state);
+var square1SolverRandomSource = undefined;
+
+// If we have a better (P)RNG:
+var setRandomSource = function(src) {
+  square1SolverRandomSource = src;
+}
+
+var square1SolverGetRandomPosition = function() {
+  if (!square1Solver_initialized) {
+    square1SolverInitialize();
   }
+  return FullCube_randomCube();
+}
 
-  var square1SolverGetRandomScramble = function() {
-    var randomState = square1SolverGetRandomPosition();
-    var scrambleString = square1SolverGenerate(randomState);
+var square1SolverGenerate = function(state) {
+  var search_search = new Search_Search; // Can this be factored out?
+  return Search_solution(search_search, state);
+}
 
-    return {
-      state: randomState,
-      scramble_string: scrambleString 
-    };
-  }
-
-  /*
-   * Export public methods.
-   */
+var square1SolverGetRandomScramble = function() {
+  var randomState = square1SolverGetRandomPosition();
+  var scrambleString = square1SolverGenerate(randomState);
 
   return {
-
-    /* mark2 interface */
-    version: "May 17, 2012",
-    initialize: square1SolverInitialize,
-    setRandomSource: setRandomSource,
-    getRandomScramble: square1SolverGetRandomScramble,
-    drawScramble: drawScramble,
-
-    /* Other methods */
-    getRandomPosition: square1SolverGetRandomPosition,
-    //solve: square1SolverSolve,
-    generate: square1SolverGenerate,
+    state: randomState,
+    scramble_string: scrambleString 
   };
+}
 
-})();
+/*
+  * Export public methods.
+  */
+
+export const scramble_sq1 = {
+
+  /* mark2 interface */
+  version: "May 17, 2012",
+  initialize: square1SolverInitialize,
+  setRandomSource: setRandomSource,
+  getRandomScramble: square1SolverGetRandomScramble,
+
+  /* Other methods */
+  getRandomPosition: square1SolverGetRandomPosition,
+  //solve: square1SolverSolve,
+  generate: square1SolverGenerate,
+};

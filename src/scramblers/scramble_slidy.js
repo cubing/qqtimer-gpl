@@ -315,3 +315,5 @@ SlidySolver.prototype.statecount = function() {
 	}
 	return cnt;
 }
+
+export { SlidySolver };
