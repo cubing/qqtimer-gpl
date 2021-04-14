@@ -1,4 +1,4 @@
-import { getskewboptscramble, scramblers } from "./scramblers";
+import { getskewboptscramble, scramblers, SlidySolver } from "./scramblers";
 import { setStyle } from "./style";
 
 type AvgOrMeanWithoutSD =
