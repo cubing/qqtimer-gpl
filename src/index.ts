@@ -1,8 +1,8 @@
 import { optionsWindowGlobals } from "./controller-ish/options";
-import { qqtimerWindowGlobals, initialize } from "./legacy/qqtimer";
-import { statsWindowGlobals } from "./legacy/stats";
-import { stopTimer } from "./controller-ish/timing";
 import { rescramble, rescramble2 } from "./controller-ish/rescramble";
+import { stopTimer } from "./controller-ish/timing";
+import { initialize, qqtimerWindowGlobals } from "./legacy/qqtimer";
+import { statsWindowGlobals } from "./legacy/stats";
 
 for (const [name, fn] of Object.entries(qqtimerWindowGlobals)) {
   globalThis[name] = fn;
