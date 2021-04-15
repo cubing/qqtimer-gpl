@@ -232,7 +232,7 @@ function checkKey(keyCode, shiftKey) {
   }
 }
 
-function resetTimes() {
+export function resetTimes() {
   if (confirm("Are you sure you want to delete ALL of your times?")) {
     initialize(false, false);
   }
@@ -360,5 +360,6 @@ export const qqtimerWindowGlobals = {
   comment,
   del,
   getlastscramble,
+  resetTimes,
   setCookie,
 };
