@@ -37,6 +37,7 @@ import {
   startTimer,
   stopTimer,
 } from "../controller-ish/timing";
+import { statsData } from "../model/statsData";
 
 // #################### TIMER STUFF ####################
 
@@ -68,30 +69,30 @@ export function initialize(lookForTimes, checkQueryString) {
   }
   globals.options.showOptions = 0;
   //toggleOptions(); // options are shown by default
-  globals.stats.avgSizes = [50, 5, 12, 100, 1000];
-  globals.stats.moSize = 3;
-  globals.stats.bestAvg = [
+  statsData.avgSizes = [50, 5, 12, 100, 1000];
+  statsData.moSize = 3;
+  statsData.bestAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  globals.stats.lastAvg = [
+  statsData.lastAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  globals.stats.bestMo = [-1, 0];
-  globals.stats.lastMo = [-1, 0];
-  globals.stats.bestAvgIndex = [0, 0, 0, 0, 0];
-  globals.stats.bestMoIndex = 0;
-  globals.stats.bestTime = -1;
-  globals.stats.bestTimeIndex = 0;
-  globals.stats.worstTime = -1;
-  globals.stats.worstTimeIndex = 0;
+  statsData.bestMo = [-1, 0];
+  statsData.lastMo = [-1, 0];
+  statsData.bestAvgIndex = [0, 0, 0, 0, 0];
+  statsData.bestMoIndex = 0;
+  statsData.bestTime = -1;
+  statsData.bestTimeIndex = 0;
+  statsData.worstTime = -1;
+  statsData.worstTimeIndex = 0;
   clearHighlight();
   if (globals.main.timerStatus != 0) {
     clearInterval(globals.main.timerID);

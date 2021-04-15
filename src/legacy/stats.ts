@@ -1,5 +1,6 @@
 import { $, toggleImport } from "../dom";
 import { globals } from "../model/globals";
+import { statsData } from "../model/statsData";
 
 let loadList;
 let changeColor;
@@ -57,7 +58,7 @@ type AllStatsWithSD = [
 ];
 
 export function getStats(recalc) {
-  var avgSizes2 = globals.stats.avgSizes
+  var avgSizes2 = statsData.avgSizes
     .slice(1 - globals.options.useAvgN)
     .sort(numsort);
   var numdnf: number = 0,
@@ -76,50 +77,47 @@ export function getStats(recalc) {
         ? -1
         : globals.main.times[index] + globals.main.notes[index] * 1000;
     if (
-      globals.stats.bestTime < 0 ||
-      (thisTime != -1 && thisTime < globals.stats.bestTime)
+      statsData.bestTime < 0 ||
+      (thisTime != -1 && thisTime < statsData.bestTime)
     ) {
-      globals.stats.bestTime = thisTime;
-      globals.stats.bestTimeIndex = index;
+      statsData.bestTime = thisTime;
+      statsData.bestTimeIndex = index;
     }
-    if (thisTime > globals.stats.worstTime) {
-      globals.stats.worstTime = thisTime;
-      globals.stats.worstTimeIndex = index;
+    if (thisTime > statsData.worstTime) {
+      statsData.worstTime = thisTime;
+      statsData.worstTimeIndex = index;
     }
     for (var j = 0; j < avgSizes2.length; j++) {
       if (globals.main.times.length < avgSizes2[j]) {
         break;
       } else {
-        globals.stats.lastAvg[j] = getAvgSD(
+        statsData.lastAvg[j] = getAvgSD(
           globals.main.times.length - avgSizes2[j],
           avgSizes2[j],
           true
         );
         if (
-          globals.stats.bestAvg[j][0] < 0 ||
-          (globals.stats.lastAvg[j][0] != -1 &&
-            globals.stats.lastAvg[j][0] < globals.stats.bestAvg[j][0])
+          statsData.bestAvg[j][0] < 0 ||
+          (statsData.lastAvg[j][0] != -1 &&
+            statsData.lastAvg[j][0] < statsData.bestAvg[j][0])
         ) {
-          globals.stats.bestAvg[j] = globals.stats.lastAvg[j];
-          globals.stats.bestAvgIndex[j] =
-            globals.main.times.length - avgSizes2[j];
+          statsData.bestAvg[j] = statsData.lastAvg[j];
+          statsData.bestAvgIndex[j] = globals.main.times.length - avgSizes2[j];
         }
       }
     }
-    if (globals.main.times.length >= globals.stats.moSize) {
-      globals.stats.lastMo = getMeanSD(
-        globals.main.times.length - globals.stats.moSize,
-        globals.stats.moSize,
+    if (globals.main.times.length >= statsData.moSize) {
+      statsData.lastMo = getMeanSD(
+        globals.main.times.length - statsData.moSize,
+        statsData.moSize,
         true
       );
       if (
-        globals.stats.bestMo[0] < 0 ||
-        (globals.stats.lastMo[0] != -1 &&
-          globals.stats.lastMo[0] < globals.stats.bestMo[0])
+        statsData.bestMo[0] < 0 ||
+        (statsData.lastMo[0] != -1 && statsData.lastMo[0] < statsData.bestMo[0])
       ) {
-        globals.stats.bestMo = globals.stats.lastMo;
-        globals.stats.bestMoIndex =
-          globals.main.times.length - globals.stats.moSize;
+        statsData.bestMo = statsData.lastMo;
+        statsData.bestMoIndex = globals.main.times.length - statsData.moSize;
       }
     }
     var sessionsum = 0;
@@ -153,44 +151,44 @@ export function getStats(recalc) {
   if (globals.options.viewstats) {
     s +=
       "<br>best time: <span onclick='setHighlight(" +
-      globals.stats.bestTimeIndex +
+      statsData.bestTimeIndex +
       ",1,0);loadList();' class='a'>";
     s +=
-      pretty(globals.stats.bestTime) +
+      pretty(statsData.bestTime) +
       "</span><br>worst time: <span onclick='setHighlight(" +
-      globals.stats.worstTimeIndex;
+      statsData.worstTimeIndex;
     s +=
       ",1,1);loadList();' class='a'>" +
-      pretty(globals.stats.worstTime) +
+      pretty(statsData.worstTime) +
       "</span><br>";
     if (globals.main.useMoN == 1) {
-      if (globals.main.times.length >= globals.stats.moSize) {
+      if (globals.main.times.length >= statsData.moSize) {
         s +=
           "<br>current mo" +
-          globals.stats.moSize +
+          statsData.moSize +
           ": <span onclick='setHighlight(" +
-          (globals.main.times.length - globals.stats.moSize);
+          (globals.main.times.length - statsData.moSize);
         s +=
           "," +
-          globals.stats.moSize +
+          statsData.moSize +
           "," +
-          globals.stats.moSize +
+          statsData.moSize +
           "2);loadList();' class='a'>" +
-          pretty(globals.stats.lastMo[0]);
-        s += "</span> (&sigma; = " + trim(globals.stats.lastMo[1], 2) + ")<br>";
+          pretty(statsData.lastMo[0]);
+        s += "</span> (&sigma; = " + trim(statsData.lastMo[1], 2) + ")<br>";
         s +=
           "best mo" +
-          globals.stats.moSize +
+          statsData.moSize +
           ": <span onclick='setHighlight(" +
-          globals.stats.bestMoIndex;
+          statsData.bestMoIndex;
         s +=
           "," +
-          globals.stats.moSize +
+          statsData.moSize +
           "," +
-          globals.stats.moSize +
+          statsData.moSize +
           "3);loadList();' class='a'>" +
-          pretty(globals.stats.bestMo[0]);
-        s += "</span> (&sigma; = " + trim(globals.stats.bestMo[1], 2) + ")<br>";
+          pretty(statsData.bestMo[0]);
+        s += "</span> (&sigma; = " + trim(statsData.bestMo[1], 2) + ")<br>";
       }
     }
     for (var j = 0; j < avgSizes2.length; j++) {
@@ -206,27 +204,21 @@ export function getStats(recalc) {
           "," +
           avgSizes2[j] +
           "1);loadList();' class='a'>" +
-          pretty(globals.stats.lastAvg[j][0]);
-        s +=
-          "</span> (&sigma; = " +
-          trim(globals.stats.lastAvg[j][1], 2) +
-          ")<br>";
+          pretty(statsData.lastAvg[j][0]);
+        s += "</span> (&sigma; = " + trim(statsData.lastAvg[j][1], 2) + ")<br>";
         s +=
           "best avg" +
           avgSizes2[j] +
           ": <span onclick='setHighlight(" +
-          globals.stats.bestAvgIndex[j];
+          statsData.bestAvgIndex[j];
         s +=
           "," +
           avgSizes2[j] +
           "," +
           avgSizes2[j] +
           "0);loadList();' class='a'>" +
-          pretty(globals.stats.bestAvg[j][0]);
-        s +=
-          "</span> (&sigma; = " +
-          trim(globals.stats.bestAvg[j][1], 2) +
-          ")<br>";
+          pretty(statsData.bestAvg[j][0]);
+        s += "</span> (&sigma; = " + trim(statsData.bestAvg[j][1], 2) + ")<br>";
       }
     }
 
@@ -248,48 +240,48 @@ export function getStats(recalc) {
 }
 
 function getAllStats(): AllStatsWithSD {
-  var avgSizes2 = globals.stats.avgSizes
+  var avgSizes2 = statsData.avgSizes
     .slice(1 - globals.options.useAvgN)
     .sort(numsort);
-  globals.stats.bestAvg = [
+  statsData.bestAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  globals.stats.lastAvg = [
+  statsData.lastAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  globals.stats.bestAvgIndex = [0, 0, 0, 0, 0];
-  globals.stats.bestTime = -1;
-  globals.stats.bestTimeIndex = 0;
-  globals.stats.worstTime = -1;
-  globals.stats.worstTimeIndex = 0;
+  statsData.bestAvgIndex = [0, 0, 0, 0, 0];
+  statsData.bestTime = -1;
+  statsData.bestTimeIndex = 0;
+  statsData.worstTime = -1;
+  statsData.worstTimeIndex = 0;
   var numdnf = 0;
   var sessionsum = 0;
-  globals.stats.bestMo = [-1, 0];
-  globals.stats.lastMo = [-1, 0];
-  globals.stats.bestMoIndex = 0;
+  statsData.bestMo = [-1, 0];
+  statsData.lastMo = [-1, 0];
+  statsData.bestMoIndex = 0;
   for (var i = 0; i < globals.main.times.length; i++) {
     var thisTime =
       globals.main.notes[i] == 1
         ? -1
         : globals.main.times[i] + globals.main.notes[i] * 1000;
     if (
-      globals.stats.bestTime < 0 ||
-      (thisTime != -1 && thisTime < globals.stats.bestTime)
+      statsData.bestTime < 0 ||
+      (thisTime != -1 && thisTime < statsData.bestTime)
     ) {
-      globals.stats.bestTime = thisTime;
-      globals.stats.bestTimeIndex = i;
+      statsData.bestTime = thisTime;
+      statsData.bestTimeIndex = i;
     }
-    if (thisTime > globals.stats.worstTime) {
-      globals.stats.worstTime = thisTime;
-      globals.stats.worstTimeIndex = i;
+    if (thisTime > statsData.worstTime) {
+      statsData.worstTime = thisTime;
+      statsData.worstTimeIndex = i;
     }
     if (thisTime == -1) {
       numdnf++;
@@ -302,28 +294,27 @@ function getAllStats(): AllStatsWithSD {
       if (globals.main.times.length - i < avgSizes2[j]) {
         break;
       } else {
-        globals.stats.lastAvg[j] = getAvgSD(i, avgSizes2[j], true);
+        statsData.lastAvg[j] = getAvgSD(i, avgSizes2[j], true);
         if (
-          globals.stats.bestAvg[j][0] < 0 ||
-          (globals.stats.lastAvg[j][0] != -1 &&
-            globals.stats.lastAvg[j][0] < globals.stats.bestAvg[j][0])
+          statsData.bestAvg[j][0] < 0 ||
+          (statsData.lastAvg[j][0] != -1 &&
+            statsData.lastAvg[j][0] < statsData.bestAvg[j][0])
         ) {
-          globals.stats.bestAvg[j] = globals.stats.lastAvg[j];
-          globals.stats.bestAvgIndex[j] = i;
+          statsData.bestAvg[j] = statsData.lastAvg[j];
+          statsData.bestAvgIndex[j] = i;
         }
       }
     }
 
     // calculate mean
-    if (globals.main.times.length - i >= globals.stats.moSize) {
-      globals.stats.lastMo = getMeanSD(i, globals.stats.moSize, true);
+    if (globals.main.times.length - i >= statsData.moSize) {
+      statsData.lastMo = getMeanSD(i, statsData.moSize, true);
       if (
-        globals.stats.bestMo[0] < 0 ||
-        (globals.stats.lastMo[0] != -1 &&
-          globals.stats.lastMo[0] < globals.stats.bestMo[0])
+        statsData.bestMo[0] < 0 ||
+        (statsData.lastMo[0] != -1 && statsData.lastMo[0] < statsData.bestMo[0])
       ) {
-        globals.stats.bestMo = globals.stats.lastMo;
-        globals.stats.bestMoIndex = i;
+        statsData.bestMo = statsData.lastMo;
+        statsData.bestMoIndex = i;
       }
     }
   }
@@ -602,7 +593,7 @@ export function changeNotes(i) {
 function changeAvgN() {
   var n = parseInt($<HTMLInputElement>("avglen").value);
   if (isNaN(n) || n < 3 || n > 10000) n = 50;
-  globals.stats.avgSizes[0] = n;
+  statsData.avgSizes[0] = n;
   clearHighlight();
   loadList();
   getStats(true);
@@ -611,7 +602,7 @@ function changeAvgN() {
 function changeMoN() {
   var n = parseInt($<HTMLInputElement>("molen").value);
   if (isNaN(n) || n < 2 || n > 10000) n = 3;
-  globals.stats.moSize = n;
+  statsData.moSize = n;
   clearHighlight();
   loadList();
   getStats(true);

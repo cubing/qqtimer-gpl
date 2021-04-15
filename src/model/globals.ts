@@ -24,21 +24,6 @@ class MainGlobalVars {
   useMono: number;
 }
 
-class StatsGlobalVars {
-  avgSizes;
-  bestAvg;
-  lastAvg;
-  bestAvgIndex;
-  bestTime;
-  bestTimeIndex;
-  worstTime;
-  worstTimeIndex;
-  moSize;
-  bestMo;
-  lastMo;
-  bestMoIndex;
-}
-
 class OptionsGlobalVars {
   useMilli = 0;
   manualEnter = 0;
@@ -73,6 +58,5 @@ class OptionsGlobalVars {
 
 export const globals = {
   main: new MainGlobalVars(),
-  stats: new StatsGlobalVars(),
   options: new OptionsGlobalVars(),
 };
