@@ -226,6 +226,16 @@ function toggleNightMode() {
   }
 }
 
+export function toggleImport() {
+  if ($("import").style.display == "block") {
+    $("import").style.display = "none";
+    globals.options.importFocus = 0;
+  } else {
+    $("import").style.display = "block";
+    globals.options.importFocus = 1;
+  }
+}
+
 export const optionsWindowGlobals = {
   changeColor,
   decreaseScrambleSize,
@@ -244,4 +254,5 @@ export const optionsWindowGlobals = {
   toggleOptions,
   toggleStatView,
   toggleTimer,
+  toggleImport,
 };
