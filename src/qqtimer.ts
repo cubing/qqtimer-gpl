@@ -1,4 +1,5 @@
 import { $, setStyle } from "./dom";
+import { globals } from "./globals";
 import {
   getLen,
   getScrambleType,
@@ -46,44 +47,44 @@ export function initialize(lookForTimes, checkQueryString) {
   if (lookForTimes) {
     getSession(); // see if there is a session saved
   } else {
-    globalVars.main.times = [];
-    globalVars.main.notes = [];
-    globalVars.main.comments = [];
-    globalVars.main.scrambleArr = [];
+    globals.main.times = [];
+    globals.main.notes = [];
+    globals.main.comments = [];
+    globals.main.scrambleArr = [];
     window.focus();
   }
   showOptions = 0;
   //toggleOptions(); // options are shown by default
-  avgSizes = [50, 5, 12, 100, 1000];
-  moSize = 3;
-  bestAvg = [
+  globals.stats.avgSizes = [50, 5, 12, 100, 1000];
+  globals.stats.moSize = 3;
+  globals.stats.bestAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  lastAvg = [
+  globals.stats.lastAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  bestMo = [-1, 0];
-  lastMo = [-1, 0];
-  bestAvgIndex = [0, 0, 0, 0, 0];
-  bestMoIndex = 0;
-  bestTime = -1;
-  bestTimeIndex = 0;
-  worstTime = -1;
-  worstTimeIndex = 0;
+  globals.stats.bestMo = [-1, 0];
+  globals.stats.lastMo = [-1, 0];
+  globals.stats.bestAvgIndex = [0, 0, 0, 0, 0];
+  globals.stats.bestMoIndex = 0;
+  globals.stats.bestTime = -1;
+  globals.stats.bestTimeIndex = 0;
+  globals.stats.worstTime = -1;
+  globals.stats.worstTimeIndex = 0;
   clearHighlight();
-  if (globalVars.main.timerStatus != 0) {
-    clearInterval(globalVars.main.timerID);
-    clearInterval(globalVars.main.inspectionID);
+  if (globals.main.timerStatus != 0) {
+    clearInterval(globals.main.timerID);
+    clearInterval(globals.main.inspectionID);
   }
-  globalVars.main.timerStatus = 3;
+  globals.main.timerStatus = 3;
 
   let timerupdate = getCookieNumber("timerupdate", 1);
   $("toggler").innerHTML =
@@ -137,12 +138,12 @@ export function initialize(lookForTimes, checkQueryString) {
   $("bldmode").innerHTML = useBld == 1 ? "on" : "off";
   useAvgN = getCookieNumber("useAvgN", 0);
   $("avgn").innerHTML = useAvgN == 1 ? "using" : "not using";
-  globalVars.main.useMoN = getCookieNumber("useMoN", 0);
-  $("mon").innerHTML = globalVars.main.useMoN == 1 ? "using" : "not using";
-  globalVars.main.useMono = getCookieNumber("useMono", 0);
-  $("monospace").innerHTML = globalVars.main.useMono == 1 ? "on" : "off";
+  globals.main.useMoN = getCookieNumber("useMoN", 0);
+  $("mon").innerHTML = globals.main.useMoN == 1 ? "using" : "not using";
+  globals.main.useMono = getCookieNumber("useMono", 0);
+  $("monospace").innerHTML = globals.main.useMono == 1 ? "on" : "off";
   $("scramble").style.fontFamily =
-    globalVars.main.useMono == 1 ? "monospace" : "serif";
+    globals.main.useMono == 1 ? "monospace" : "serif";
   $("getlast").style.color = parseColor($<HTMLInputElement>("lcol").value);
   setScrambleType(getCookieWithDefault("scrType", "333"));
   if (query.length > 0) setScrambleType(query);
@@ -152,7 +153,7 @@ export function initialize(lookForTimes, checkQueryString) {
 
   initializeScramblers();
 
-  globalVars.main.curTime = new Date(0);
+  globals.main.curTime = new Date(0);
   $<HTMLInputElement>("leng").value = getSelection().toString();
   var obj = $<HTMLSelectElement>("optbox");
   for (var i = 0; i < scrdata.length; i++) {
@@ -216,102 +217,95 @@ function loadOptBoxes() {
 
 function startTimer(keyCode) {
   if (
-    globalVars.main.timerStatus == 0 &&
+    globals.main.timerStatus == 0 &&
     manualEnter == 0 &&
     keyCode == 32 &&
     importFocus == 0
   ) {
-    globalVars.main.timerStatus = 3;
+    globals.main.timerStatus = 3;
   } else if (
-    globalVars.main.timerStatus == 3 &&
+    globals.main.timerStatus == 3 &&
     manualEnter == 0 &&
     keyCode == 32 &&
-    new Date().getTime() - globalVars.main.curTime.getTime() >= 300 &&
+    new Date().getTime() - globals.main.curTime.getTime() >= 300 &&
     importFocus == 0
   ) {
     if (getScrambleType() == "sqrs") {
       $("scramble").innerHTML = "scramble: loading... ";
     }
     if (inspection == 1) {
-      globalVars.main.timerStatus = 2;
-      globalVars.main.inspectionTime = new Date();
+      globals.main.timerStatus = 2;
+      globals.main.inspectionTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = "red";
-      if (globalVars.main.timerupdate != 0) {
-        globalVars.main.inspectionID = setInterval(
+      if (globals.main.timerupdate != 0) {
+        globals.main.inspectionID = setInterval(
           updateInspec,
-          globalVars.main.timerupdate == 1 ? 10 : 100
+          globals.main.timerupdate == 1 ? 10 : 100
         );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "inspecting";
       }
     } else if (useBld == 1) {
-      globalVars.main.timerStatus = 4;
-      globalVars.main.memoTime = new Date();
+      globals.main.timerStatus = 4;
+      globals.main.memoTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = $<HTMLInputElement>(
         "memcol"
       ).value;
-      if (
-        globalVars.main.timerupdate == 1 ||
-        globalVars.main.timerupdate == 2
-      ) {
-        globalVars.main.memoID = setInterval(
+      if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
+        globals.main.memoID = setInterval(
           updateMemo,
-          globalVars.main.timerupdate == 1 ? 10 : 100
+          globals.main.timerupdate == 1 ? 10 : 100
         );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "memorizing";
       }
     } else {
-      globalVars.main.timerStatus = 1;
-      globalVars.main.startTime = new Date();
+      globals.main.timerStatus = 1;
+      globals.main.startTime = new Date();
       penalty = 0;
-      $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
+      $<HTMLSpanElement>("theTime").style.color = globals.main.nightMode
         ? "#fff"
         : $<HTMLInputElement>("fcol").value;
-      if (
-        globalVars.main.timerupdate == 1 ||
-        globalVars.main.timerupdate == 2
-      ) {
-        globalVars.main.timerID = setInterval(
+      if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
+        globals.main.timerID = setInterval(
           updateTimer,
-          globalVars.main.timerupdate == 1 ? 10 : 100
+          globals.main.timerupdate == 1 ? 10 : 100
         );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "running";
       }
     }
-  } else if (globalVars.main.timerStatus == 4 && keyCode == 32) {
-    globalVars.main.timerStatus = 1;
-    globalVars.main.startTime = new Date();
-    $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
+  } else if (globals.main.timerStatus == 4 && keyCode == 32) {
+    globals.main.timerStatus = 1;
+    globals.main.startTime = new Date();
+    $<HTMLSpanElement>("theTime").style.color = globals.main.nightMode
       ? "#fff"
       : $<HTMLInputElement>("fcol").value;
     var memoLength =
-      globalVars.main.startTime.getTime() - globalVars.main.memoTime.getTime();
-    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
-      clearInterval(globalVars.main.memoID);
-      globalVars.main.timerID = setInterval(
+      globals.main.startTime.getTime() - globals.main.memoTime.getTime();
+    if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
+      clearInterval(globals.main.memoID);
+      globals.main.timerID = setInterval(
         updateMemo,
-        globalVars.main.timerupdate == 1 ? 10 : 100
+        globals.main.timerupdate == 1 ? 10 : 100
       );
     } else {
       $<HTMLSpanElement>("theTime").innerHTML = "running";
     }
-  } else if (globalVars.main.timerStatus == 2 && keyCode == 32) {
-    globalVars.main.timerStatus = 1;
-    globalVars.main.startTime = new Date();
-    $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
+  } else if (globals.main.timerStatus == 2 && keyCode == 32) {
+    globals.main.timerStatus = 1;
+    globals.main.startTime = new Date();
+    $<HTMLSpanElement>("theTime").style.color = globals.main.nightMode
       ? "#fff"
       : $<HTMLInputElement>("fcol").value;
     var inspecLength =
-      globalVars.main.startTime.getTime() -
-      globalVars.main.inspectionTime.getTime();
+      globals.main.startTime.getTime() - globals.main.inspectionTime.getTime();
     penalty = inspecLength < 15000 ? 0 : inspecLength < 17000 ? 2 : 1;
-    clearInterval(globalVars.main.inspectionID);
-    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
-      globalVars.main.timerID = setInterval(
+    clearInterval(globals.main.inspectionID);
+    if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
+      globals.main.timerID = setInterval(
         updateTimer,
-        globalVars.main.timerupdate == 1 ? 10 : 100
+        globals.main.timerupdate == 1 ? 10 : 100
       );
     } else {
       $<HTMLSpanElement>("theTime").innerHTML = "running";
@@ -333,8 +327,8 @@ function stopTimer(keyCode?: number) {
         nonzero = parseTime(timeStr.replace(/(.*) .*/, "$1"), true);
         if (nonzero) {
           // if time breaks, ignore comments/notes
-          globalVars.main.comments[
-            globalVars.main.times.length - 1
+          globals.main.comments[
+            globals.main.times.length - 1
           ] = timeStr.replace(/.*? (.*)$/, "$1");
         }
       } else if (timeStr.match(dnfRegex)) {
@@ -344,31 +338,29 @@ function stopTimer(keyCode?: number) {
       }
       if (nonzero) {
         if (timeStr.match(/.*(DNF|dnf).*/)) {
-          globalVars.main.notes[globalVars.main.times.length - 1] = 1;
+          globals.main.notes[globals.main.times.length - 1] = 1;
         } else if (timeStr.match(/.*\+.*/)) {
-          globalVars.main.notes[globalVars.main.times.length - 1] = 2;
+          globals.main.notes[globals.main.times.length - 1] = 2;
         } else {
-          globalVars.main.notes[globalVars.main.times.length - 1] = 0;
+          globals.main.notes[globals.main.times.length - 1] = 0;
         }
         loadList(); // unfortunately have to do this twice ;|
         getStats(false);
       }
       $<HTMLInputElement>("timeEntry").value = "";
       if (nonzero)
-        globalVars.main.scrambleArr[
-          globalVars.main.scrambleArr.length
+        globals.main.scrambleArr[
+          globals.main.scrambleArr.length
         ] = getScramble();
       rescramble3();
     }
-  } else if (globalVars.main.timerStatus == 1) {
-    globalVars.main.timerStatus = keyCode == 32 ? 0 : 3;
-    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
-      clearInterval(globalVars.main.timerID);
+  } else if (globals.main.timerStatus == 1) {
+    globals.main.timerStatus = keyCode == 32 ? 0 : 3;
+    if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
+      clearInterval(globals.main.timerID);
     }
     getTime(penalty);
-    globalVars.main.scrambleArr[
-      globalVars.main.scrambleArr.length
-    ] = getScramble();
+    globals.main.scrambleArr[globals.main.scrambleArr.length] = getScramble();
     rescramble3();
   }
 }
@@ -377,21 +369,21 @@ function checkKey(keyCode, shiftKey) {
   if (
     keyCode == 13 ||
     (manualEnter == 0 &&
-      globalVars.main.timerStatus != 0 &&
-      globalVars.main.timerStatus != 3)
+      globals.main.timerStatus != 0 &&
+      globals.main.timerStatus != 3)
   ) {
     // normally, any key enters a time; with manual enter, only Enter does
     stopTimer(keyCode);
   } else if (keyCode == 8 && manualEnter == 0) {
     // backspace applies DNF
-    if (globalVars.main.notes[globalVars.main.notes.length - 1] == 1) {
+    if (globals.main.notes[globals.main.notes.length - 1] == 1) {
       changeNotes(0);
     } else {
       changeNotes(1);
     }
   } else if ((keyCode == 61 || keyCode == 187) && manualEnter == 0) {
     // +/= applies +2 penalty
-    if (globalVars.main.notes[globalVars.main.notes.length - 1] == 2) {
+    if (globals.main.notes[globals.main.notes.length - 1] == 2) {
       changeNotes(0);
     } else {
       changeNotes(2);
@@ -399,9 +391,9 @@ function checkKey(keyCode, shiftKey) {
   } else if (keyCode == 173 || keyCode == 189) {
     // -/_ applies no penalty
     changeNotes(0);
-  } else if (keyCode == 46 && !shiftKey && globalVars.main.times.length > 0) {
+  } else if (keyCode == 46 && !shiftKey && globals.main.times.length > 0) {
     // delete removes last solve
-    del(globalVars.main.times.length - 1);
+    del(globals.main.times.length - 1);
   } else if (keyCode == 46 && shiftKey) {
     // shift+delete clears session
     resetTimes();
@@ -409,10 +401,9 @@ function checkKey(keyCode, shiftKey) {
 }
 
 function updateTimer() {
-  globalVars.main.curTime = new Date();
-  var time =
-    globalVars.main.curTime.getTime() - globalVars.main.startTime.getTime();
-  if (globalVars.main.timerupdate == 1) {
+  globals.main.curTime = new Date();
+  var time = globals.main.curTime.getTime() - globals.main.startTime.getTime();
+  if (globals.main.timerupdate == 1) {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   } else {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time).split(".")[0];
@@ -420,10 +411,9 @@ function updateTimer() {
 }
 
 function updateMemo() {
-  globalVars.main.curTime = new Date();
-  var time =
-    globalVars.main.curTime.getTime() - globalVars.main.memoTime.getTime();
-  if (globalVars.main.timerupdate == 1) {
+  globals.main.curTime = new Date();
+  var time = globals.main.curTime.getTime() - globals.main.memoTime.getTime();
+  if (globals.main.timerupdate == 1) {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   } else {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time).split(".")[0];
@@ -431,10 +421,9 @@ function updateMemo() {
 }
 
 function updateInspec() {
-  globalVars.main.curTime = new Date();
+  globals.main.curTime = new Date();
   var time =
-    globalVars.main.curTime.getTime() -
-    globalVars.main.inspectionTime.getTime();
+    globals.main.curTime.getTime() - globals.main.inspectionTime.getTime();
   $<HTMLSpanElement>("theTime").textContent =
     time > 17000
       ? "DNF"
@@ -444,23 +433,22 @@ function updateInspec() {
 }
 
 function getTime(note) {
-  globalVars.main.curTime = new Date();
+  globals.main.curTime = new Date();
 
   if (useBld == 1) {
-    var time =
-      globalVars.main.curTime.getTime() - globalVars.main.memoTime.getTime();
+    var time = globals.main.curTime.getTime() - globals.main.memoTime.getTime();
     var mtime =
-      globalVars.main.startTime.getTime() - globalVars.main.memoTime.getTime();
+      globals.main.startTime.getTime() - globals.main.memoTime.getTime();
   } else {
     var time =
-      globalVars.main.curTime.getTime() - globalVars.main.startTime.getTime();
+      globals.main.curTime.getTime() - globals.main.startTime.getTime();
   }
-  globalVars.main.times[globalVars.main.times.length] = time;
-  globalVars.main.notes[globalVars.main.notes.length] = note;
+  globals.main.times[globals.main.times.length] = time;
+  globals.main.notes[globals.main.notes.length] = note;
   if (useBld == 1) {
-    globalVars.main.comments[globalVars.main.comments.length] = pretty(mtime);
+    globals.main.comments[globals.main.comments.length] = pretty(mtime);
   } else {
-    globalVars.main.comments[globalVars.main.comments.length] = "";
+    globals.main.comments[globals.main.comments.length] = "";
   }
   $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   clearHighlight();
@@ -486,12 +474,12 @@ function parseTime(s: string, importing: boolean = false) {
   if (time != 0) {
     // don't insert zero-times
     if (!importing) {
-      globalVars.main.notes[globalVars.main.notes.length] = 0;
-      globalVars.main.comments[globalVars.main.comments.length] = "";
-    } else if (globalVars.main.notes[globalVars.main.times.length] == 2) {
+      globals.main.notes[globals.main.notes.length] = 0;
+      globals.main.comments[globals.main.comments.length] = "";
+    } else if (globals.main.notes[globals.main.times.length] == 2) {
       time -= 2000;
     }
-    globalVars.main.times[globalVars.main.times.length] = time;
+    globals.main.times[globals.main.times.length] = time;
     if (!importing) {
       clearHighlight();
       loadList();
@@ -515,42 +503,39 @@ function loadList() {
     "times (<span onclick='resetTimes();' class='a'>reset</span>, <span onclick='toggleImport();' class='a'>import</span>):<br>";
   // get the best and worst time for the highlighted average
   if (
-    globalVars.main.highlightStop != -1 &&
-    globalVars.main.highlightStop - globalVars.main.highlightStart > 1
+    globals.main.highlightStop != -1 &&
+    globals.main.highlightStop - globals.main.highlightStart > 1
   ) {
     var mean = 0;
-    if (
-      globalVars.main.highlightID > 10 &&
-      globalVars.main.highlightID % 10 > 1
-    )
+    if (globals.main.highlightID > 10 && globals.main.highlightID % 10 > 1)
       mean = 1; // check to see if this is a mean-of-N or not
     if (mean) {
       data = getMeanSD(
-        globalVars.main.highlightStart,
-        globalVars.main.highlightStop - globalVars.main.highlightStart + 1,
+        globals.main.highlightStart,
+        globals.main.highlightStop - globals.main.highlightStart + 1,
         false
       );
     } else {
       data = getAvgSD(
-        globalVars.main.highlightStart,
-        globalVars.main.highlightStop - globalVars.main.highlightStart + 1,
+        globals.main.highlightStart,
+        globals.main.highlightStop - globals.main.highlightStart + 1,
         false
       );
     }
   }
-  for (var i = 0; i < globalVars.main.times.length; i++) {
-    if (i == globalVars.main.highlightStart) {
+  for (var i = 0; i < globals.main.times.length; i++) {
+    if (i == globals.main.highlightStart) {
       s += "<span style='background-color: " + highlightColor + "'>";
     }
     if (
-      data[1].indexOf(i - globalVars.main.highlightStart) > -1 ||
-      data[2].indexOf(i - globalVars.main.highlightStart) > -1
+      data[1].indexOf(i - globals.main.highlightStart) > -1 ||
+      data[2].indexOf(i - globals.main.highlightStart) > -1
     )
       s += "(";
-    var time = globalVars.main.times[i];
-    if (globalVars.main.notes[i] == 0) {
+    var time = globals.main.times[i];
+    if (globals.main.notes[i] == 0) {
       s += "<span onclick='del(" + i + ");' class='b'>" + pretty(time);
-    } else if (globalVars.main.notes[i] == 2) {
+    } else if (globals.main.notes[i] == 2) {
       s +=
         "<span onclick='del(" +
         i +
@@ -562,18 +547,17 @@ function loadList() {
         "<span onclick='del(" + i + ");' class='b'>DNF(" + pretty(time) + ")";
     }
     s +=
-      (globalVars.main.comments[i]
-        ? "[" + globalVars.main.comments[i] + "]"
-        : "") + "</span>";
+      (globals.main.comments[i] ? "[" + globals.main.comments[i] + "]" : "") +
+      "</span>";
     if (
-      data[1].indexOf(i - globalVars.main.highlightStart) > -1 ||
-      data[2].indexOf(i - globalVars.main.highlightStart) > -1
+      data[1].indexOf(i - globals.main.highlightStart) > -1 ||
+      data[2].indexOf(i - globals.main.highlightStart) > -1
     )
       s += ")";
-    if (i == globalVars.main.highlightStop) {
+    if (i == globals.main.highlightStop) {
       s += "</span>";
     }
-    s += i == globalVars.main.times.length - 1 ? " " : ", ";
+    s += i == globals.main.times.length - 1 ? " " : ", ";
   }
   $("theList").innerHTML = s;
   saveSession();
@@ -584,21 +568,21 @@ function loadList() {
 }
 
 function del(index) {
-  var prettyTime = pretty(globalVars.main.times[index]);
-  if (globalVars.main.notes[index] == 1) prettyTime = "DNF(" + prettyTime + ")";
-  if (globalVars.main.notes[index] == 2)
-    prettyTime = pretty(globalVars.main.times[index] + 2000) + "+";
+  var prettyTime = pretty(globals.main.times[index]);
+  if (globals.main.notes[index] == 1) prettyTime = "DNF(" + prettyTime + ")";
+  if (globals.main.notes[index] == 2)
+    prettyTime = pretty(globals.main.times[index] + 2000) + "+";
   if (confirm("Are you sure you want to delete the " + prettyTime + "?")) {
-    for (var i = index; i < globalVars.main.times.length - 1; i++) {
-      globalVars.main.times[i] = globalVars.main.times[i + 1];
-      globalVars.main.notes[i] = globalVars.main.notes[i + 1];
-      globalVars.main.comments[i] = globalVars.main.comments[i + 1];
-      globalVars.main.scrambleArr[i] = globalVars.main.scrambleArr[i + 1];
+    for (var i = index; i < globals.main.times.length - 1; i++) {
+      globals.main.times[i] = globals.main.times[i + 1];
+      globals.main.notes[i] = globals.main.notes[i + 1];
+      globals.main.comments[i] = globals.main.comments[i + 1];
+      globals.main.scrambleArr[i] = globals.main.scrambleArr[i + 1];
     }
-    globalVars.main.times.pop();
-    globalVars.main.notes.pop();
-    globalVars.main.comments.pop();
-    globalVars.main.scrambleArr.pop();
+    globals.main.times.pop();
+    globals.main.notes.pop();
+    globals.main.comments.pop();
+    globals.main.scrambleArr.pop();
     clearHighlight();
     loadList();
     getStats(true);
@@ -614,12 +598,12 @@ function getlastscramble() {
 function comment() {
   var newComment = prompt(
     "Enter your comment for the most recent solve:",
-    globalVars.main.comments[globalVars.main.comments.length - 1]
+    globals.main.comments[globals.main.comments.length - 1]
   );
   if (newComment != null) {
-    globalVars.main.comments[globalVars.main.comments.length - 1] = newComment;
+    globals.main.comments[globals.main.comments.length - 1] = newComment;
   } else {
-    globalVars.main.comments[globalVars.main.comments.length - 1] = "";
+    globals.main.comments[globals.main.comments.length - 1] = "";
   }
   loadList();
 }
@@ -697,14 +681,14 @@ function toggleImport() {
 
 function toggleTimer() {
   stopTimer();
-  globalVars.main.timerupdate = (globalVars.main.timerupdate + 1) % 4;
-  setCookie("timerupdate", globalVars.main.timerupdate);
+  globals.main.timerupdate = (globals.main.timerupdate + 1) % 4;
+  setCookie("timerupdate", globals.main.timerupdate);
   $("toggler").innerHTML =
-    globalVars.main.timerupdate == 0
+    globals.main.timerupdate == 0
       ? "off"
-      : globalVars.main.timerupdate == 1
+      : globals.main.timerupdate == 1
       ? "on"
-      : globalVars.main.timerupdate == 2
+      : globals.main.timerupdate == 2
       ? "seconds only"
       : "inspection only";
 }
@@ -726,11 +710,11 @@ function toggleBld() {
 }
 
 function toggleMono() {
-  globalVars.main.useMono = 1 - globalVars.main.useMono;
-  setCookie("useMono", globalVars.main.useMono);
-  $("monospace").innerHTML = globalVars.main.useMono == 1 ? "on" : "off";
+  globals.main.useMono = 1 - globals.main.useMono;
+  setCookie("useMono", globals.main.useMono);
+  $("monospace").innerHTML = globals.main.useMono == 1 ? "on" : "off";
   $("scramble").style.fontFamily =
-    globalVars.main.useMono == 1 ? "monospace" : "serif";
+    globals.main.useMono == 1 ? "monospace" : "serif";
   $("getlast").style.color = parseColor($<HTMLInputElement>("lcol").value);
 }
 
@@ -812,9 +796,9 @@ function toggleAvgN() {
 }
 
 function toggleMoN() {
-  globalVars.main.useMoN = 1 - globalVars.main.useMoN;
-  setCookie("useMoN", globalVars.main.useMoN);
-  $("mon").innerHTML = globalVars.main.useMoN == 1 ? "using" : "not using";
+  globals.main.useMoN = 1 - globals.main.useMoN;
+  setCookie("useMoN", globals.main.useMoN);
+  $("mon").innerHTML = globals.main.useMoN == 1 ? "using" : "not using";
   getStats(true);
 }
 
@@ -827,7 +811,7 @@ function changeColor() {
   ($("menu") as HTMLTableCellElement).bgColor = parseColor(
     $<HTMLInputElement>("tcol").value
   );
-  if (globalVars.main.nightMode) {
+  if (globals.main.nightMode) {
     document.bgColor = "#000";
     document.body.style.color = "#fff";
   } else {
@@ -884,8 +868,8 @@ function resetColors() {
 }
 
 function toggleNightMode() {
-  globalVars.main.nightMode = !globalVars.main.nightMode;
-  if (globalVars.main.nightMode) {
+  globals.main.nightMode = !globals.main.nightMode;
+  if (globals.main.nightMode) {
     document.bgColor = "#000";
     document.body.style.color = "#fff";
     $<HTMLSpanElement>("theTime").style.color = "#fff";
@@ -995,17 +979,14 @@ function saveSession() {
 
   if (window.localStorage !== undefined) {
     var value = "";
-    for (var i = 0; i < globalVars.main.times.length; i++) {
-      value += globalVars.main.times[i];
-      if (
-        globalVars.main.comments[i] != "" &&
-        globalVars.main.comments[i] !== null
-      ) {
-        value += "|" + globalVars.main.comments[i];
+    for (var i = 0; i < globals.main.times.length; i++) {
+      value += globals.main.times[i];
+      if (globals.main.comments[i] != "" && globals.main.comments[i] !== null) {
+        value += "|" + globals.main.comments[i];
       }
-      if (globalVars.main.notes[i] == 1) value += "-";
-      if (globalVars.main.notes[i] == 2) value += "+";
-      if (i < globalVars.main.times.length - 1) value += ",";
+      if (globals.main.notes[i] == 1) value += "-";
+      if (globals.main.notes[i] == 2) value += "+";
+      if (i < globals.main.times.length - 1) value += ",";
     }
     value += ">";
 
@@ -1020,19 +1001,16 @@ function saveSession() {
   var expires = "; expires=" + new Date(3000, 0, 1).toUTCString() + "; path=/";
   var cnt = 1;
   var s = name + "|" + cnt + "=";
-  for (var i = 0; i < globalVars.main.times.length; i++) {
+  for (var i = 0; i < globals.main.times.length; i++) {
     if (s.length < 3950) {
       // just in case!
-      s += globalVars.main.times[i];
-      if (
-        globalVars.main.comments[i] != "" &&
-        globalVars.main.comments[i] !== null
-      ) {
-        s += "|" + globalVars.main.comments[i];
+      s += globals.main.times[i];
+      if (globals.main.comments[i] != "" && globals.main.comments[i] !== null) {
+        s += "|" + globals.main.comments[i];
       }
-      if (globalVars.main.notes[i] == 1) s += "-";
-      if (globalVars.main.notes[i] == 2) s += "+";
-      if (i < globalVars.main.times.length - 1) s += ",";
+      if (globals.main.notes[i] == 1) s += "-";
+      if (globals.main.notes[i] == 2) s += "+";
+      if (i < globals.main.times.length - 1) s += ",";
     } else {
       document.cookie = s + expires;
       cnt++;
@@ -1048,10 +1026,10 @@ function getSession() {
     $<HTMLSelectElement>("sessbox").selectedIndex == null
       ? 0
       : $<HTMLSelectElement>("sessbox").selectedIndex;
-  globalVars.main.times = [];
-  globalVars.main.notes = [];
-  globalVars.main.comments = [];
-  globalVars.main.scrambleArr = [];
+  globals.main.times = [];
+  globals.main.notes = [];
+  globals.main.comments = [];
+  globals.main.scrambleArr = [];
   $("sessbox").blur();
 
   var s = null;
@@ -1099,18 +1077,18 @@ function getSession() {
         t[j] = t[j].slice(0, t[j].length - 1);
       }
       if (t[j].slice(-1) == "-") {
-        globalVars.main.notes[j] = 1;
+        globals.main.notes[j] = 1;
         t[j] = t[j].slice(0, t[j].length - 1);
       } else if (t[j].slice(-1) == "+") {
-        globalVars.main.notes[j] = 2;
+        globals.main.notes[j] = 2;
         t[j] = t[j].slice(0, t[j].length - 1);
       } else {
-        globalVars.main.notes[j] = 0;
+        globals.main.notes[j] = 0;
       }
       var q = t[j].split("|");
-      globalVars.main.times[j] = parseInt(q[0]);
-      globalVars.main.comments[j] = q[1] != null && q[1] != "" ? q[1] : "";
-      globalVars.main.scrambleArr[j] = "";
+      globals.main.times[j] = parseInt(q[0]);
+      globals.main.comments[j] = q[1] != null && q[1] != "" ? q[1] : "";
+      globals.main.scrambleArr[j] = "";
     }
   }
   clearHighlight();
@@ -1118,12 +1096,8 @@ function getSession() {
 
 // #################### STATISTICS ####################
 
-var avgSizes, bestAvg, lastAvg, bestAvgIndex;
-var bestTime, bestTimeIndex, worstTime, worstTimeIndex;
-var moSize, bestMo, lastMo, bestMoIndex;
-
 function getStats(recalc) {
-  var avgSizes2 = avgSizes.slice(1 - useAvgN).sort(numsort);
+  var avgSizes2 = globals.stats.avgSizes.slice(1 - useAvgN).sort(numsort);
   var numdnf: number = 0,
     sessionavg,
     sessionmean;
@@ -1134,61 +1108,75 @@ function getStats(recalc) {
     sessionmean = theStats[2];
   } else {
     // update averages and best time / worst time.
-    var index = globalVars.main.times.length - 1;
+    var index = globals.main.times.length - 1;
     var thisTime =
-      globalVars.main.notes[index] == 1
+      globals.main.notes[index] == 1
         ? -1
-        : globalVars.main.times[index] + globalVars.main.notes[index] * 1000;
-    if (bestTime < 0 || (thisTime != -1 && thisTime < bestTime)) {
-      bestTime = thisTime;
-      bestTimeIndex = index;
+        : globals.main.times[index] + globals.main.notes[index] * 1000;
+    if (
+      globals.stats.bestTime < 0 ||
+      (thisTime != -1 && thisTime < globals.stats.bestTime)
+    ) {
+      globals.stats.bestTime = thisTime;
+      globals.stats.bestTimeIndex = index;
     }
-    if (thisTime > worstTime) {
-      worstTime = thisTime;
-      worstTimeIndex = index;
+    if (thisTime > globals.stats.worstTime) {
+      globals.stats.worstTime = thisTime;
+      globals.stats.worstTimeIndex = index;
     }
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (globalVars.main.times.length < avgSizes2[j]) {
+      if (globals.main.times.length < avgSizes2[j]) {
         break;
       } else {
-        lastAvg[j] = getAvgSD(
-          globalVars.main.times.length - avgSizes2[j],
+        globals.stats.lastAvg[j] = getAvgSD(
+          globals.main.times.length - avgSizes2[j],
           avgSizes2[j],
           true
         );
         if (
-          bestAvg[j][0] < 0 ||
-          (lastAvg[j][0] != -1 && lastAvg[j][0] < bestAvg[j][0])
+          globals.stats.bestAvg[j][0] < 0 ||
+          (globals.stats.lastAvg[j][0] != -1 &&
+            globals.stats.lastAvg[j][0] < globals.stats.bestAvg[j][0])
         ) {
-          bestAvg[j] = lastAvg[j];
-          bestAvgIndex[j] = globalVars.main.times.length - avgSizes2[j];
+          globals.stats.bestAvg[j] = globals.stats.lastAvg[j];
+          globals.stats.bestAvgIndex[j] =
+            globals.main.times.length - avgSizes2[j];
         }
       }
     }
-    if (globalVars.main.times.length >= moSize) {
-      lastMo = getMeanSD(globalVars.main.times.length - moSize, moSize, true);
-      if (bestMo[0] < 0 || (lastMo[0] != -1 && lastMo[0] < bestMo[0])) {
-        bestMo = lastMo;
-        bestMoIndex = globalVars.main.times.length - moSize;
+    if (globals.main.times.length >= globals.stats.moSize) {
+      globals.stats.lastMo = getMeanSD(
+        globals.main.times.length - globals.stats.moSize,
+        globals.stats.moSize,
+        true
+      );
+      if (
+        globals.stats.bestMo[0] < 0 ||
+        (globals.stats.lastMo[0] != -1 &&
+          globals.stats.lastMo[0] < globals.stats.bestMo[0])
+      ) {
+        globals.stats.bestMo = globals.stats.lastMo;
+        globals.stats.bestMoIndex =
+          globals.main.times.length - globals.stats.moSize;
       }
     }
     var sessionsum = 0;
-    for (var i = 0; i < globalVars.main.times.length; i++) {
+    for (var i = 0; i < globals.main.times.length; i++) {
       var thisTime =
-        globalVars.main.notes[i] == 1
+        globals.main.notes[i] == 1
           ? -1
-          : globalVars.main.times[i] + globalVars.main.notes[i] * 1000;
+          : globals.main.times[i] + globals.main.notes[i] * 1000;
       if (thisTime == -1) {
         numdnf++;
       } else {
         sessionsum += thisTime;
       }
     }
-    sessionavg = getAvgSD(0, globalVars.main.times.length, true);
+    sessionavg = getAvgSD(0, globals.main.times.length, true);
     sessionmean =
-      numdnf == globalVars.main.times.length
+      numdnf == globals.main.times.length
         ? -1
-        : sessionsum / (globalVars.main.times.length - numdnf);
+        : sessionsum / (globals.main.times.length - numdnf);
   }
 
   var s =
@@ -1197,80 +1185,92 @@ function getStats(recalc) {
     "</span>)<br>";
   s +=
     "number of times: " +
-    (globalVars.main.times.length - numdnf) +
+    (globals.main.times.length - numdnf) +
     "/" +
-    globalVars.main.times.length;
+    globals.main.times.length;
   if (viewstats) {
     s +=
       "<br>best time: <span onclick='setHighlight(" +
-      bestTimeIndex +
+      globals.stats.bestTimeIndex +
       ",1,0);loadList();' class='a'>";
     s +=
-      pretty(bestTime) +
+      pretty(globals.stats.bestTime) +
       "</span><br>worst time: <span onclick='setHighlight(" +
-      worstTimeIndex;
-    s += ",1,1);loadList();' class='a'>" + pretty(worstTime) + "</span><br>";
-    if (globalVars.main.useMoN == 1) {
-      if (globalVars.main.times.length >= moSize) {
+      globals.stats.worstTimeIndex;
+    s +=
+      ",1,1);loadList();' class='a'>" +
+      pretty(globals.stats.worstTime) +
+      "</span><br>";
+    if (globals.main.useMoN == 1) {
+      if (globals.main.times.length >= globals.stats.moSize) {
         s +=
           "<br>current mo" +
-          moSize +
+          globals.stats.moSize +
           ": <span onclick='setHighlight(" +
-          (globalVars.main.times.length - moSize);
+          (globals.main.times.length - globals.stats.moSize);
         s +=
           "," +
-          moSize +
+          globals.stats.moSize +
           "," +
-          moSize +
+          globals.stats.moSize +
           "2);loadList();' class='a'>" +
-          pretty(lastMo[0]);
-        s += "</span> (&sigma; = " + trim(lastMo[1], 2) + ")<br>";
+          pretty(globals.stats.lastMo[0]);
+        s += "</span> (&sigma; = " + trim(globals.stats.lastMo[1], 2) + ")<br>";
         s +=
-          "best mo" + moSize + ": <span onclick='setHighlight(" + bestMoIndex;
+          "best mo" +
+          globals.stats.moSize +
+          ": <span onclick='setHighlight(" +
+          globals.stats.bestMoIndex;
         s +=
           "," +
-          moSize +
+          globals.stats.moSize +
           "," +
-          moSize +
+          globals.stats.moSize +
           "3);loadList();' class='a'>" +
-          pretty(bestMo[0]);
-        s += "</span> (&sigma; = " + trim(bestMo[1], 2) + ")<br>";
+          pretty(globals.stats.bestMo[0]);
+        s += "</span> (&sigma; = " + trim(globals.stats.bestMo[1], 2) + ")<br>";
       }
     }
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (globalVars.main.times.length >= avgSizes2[j]) {
+      if (globals.main.times.length >= avgSizes2[j]) {
         s +=
           "<br>current avg" +
           avgSizes2[j] +
           ": <span onclick='setHighlight(" +
-          (globalVars.main.times.length - avgSizes2[j]);
+          (globals.main.times.length - avgSizes2[j]);
         s +=
           "," +
           avgSizes2[j] +
           "," +
           avgSizes2[j] +
           "1);loadList();' class='a'>" +
-          pretty(lastAvg[j][0]);
-        s += "</span> (&sigma; = " + trim(lastAvg[j][1], 2) + ")<br>";
+          pretty(globals.stats.lastAvg[j][0]);
+        s +=
+          "</span> (&sigma; = " +
+          trim(globals.stats.lastAvg[j][1], 2) +
+          ")<br>";
         s +=
           "best avg" +
           avgSizes2[j] +
           ": <span onclick='setHighlight(" +
-          bestAvgIndex[j];
+          globals.stats.bestAvgIndex[j];
         s +=
           "," +
           avgSizes2[j] +
           "," +
           avgSizes2[j] +
           "0);loadList();' class='a'>" +
-          pretty(bestAvg[j][0]);
-        s += "</span> (&sigma; = " + trim(bestAvg[j][1], 2) + ")<br>";
+          pretty(globals.stats.bestAvg[j][0]);
+        s +=
+          "</span> (&sigma; = " +
+          trim(globals.stats.bestAvg[j][1], 2) +
+          ")<br>";
       }
     }
 
     s +=
       "<br>session avg: <span onclick='setHighlight(0," +
-      globalVars.main.times.length +
+      globals.main.times.length +
       ",2);loadList();' class='a'>";
     s +=
       pretty(sessionavg[0]) +
@@ -1286,43 +1286,46 @@ function getStats(recalc) {
 }
 
 function getAllStats(): AllStatsWithSD {
-  var avgSizes2 = avgSizes.slice(1 - useAvgN).sort(numsort);
-  bestAvg = [
+  var avgSizes2 = globals.stats.avgSizes.slice(1 - useAvgN).sort(numsort);
+  globals.stats.bestAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  lastAvg = [
+  globals.stats.lastAvg = [
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
     [-1, 0],
   ];
-  bestAvgIndex = [0, 0, 0, 0, 0];
-  bestTime = -1;
-  bestTimeIndex = 0;
-  worstTime = -1;
-  worstTimeIndex = 0;
+  globals.stats.bestAvgIndex = [0, 0, 0, 0, 0];
+  globals.stats.bestTime = -1;
+  globals.stats.bestTimeIndex = 0;
+  globals.stats.worstTime = -1;
+  globals.stats.worstTimeIndex = 0;
   var numdnf = 0;
   var sessionsum = 0;
-  bestMo = [-1, 0];
-  lastMo = [-1, 0];
-  bestMoIndex = 0;
-  for (var i = 0; i < globalVars.main.times.length; i++) {
+  globals.stats.bestMo = [-1, 0];
+  globals.stats.lastMo = [-1, 0];
+  globals.stats.bestMoIndex = 0;
+  for (var i = 0; i < globals.main.times.length; i++) {
     var thisTime =
-      globalVars.main.notes[i] == 1
+      globals.main.notes[i] == 1
         ? -1
-        : globalVars.main.times[i] + globalVars.main.notes[i] * 1000;
-    if (bestTime < 0 || (thisTime != -1 && thisTime < bestTime)) {
-      bestTime = thisTime;
-      bestTimeIndex = i;
+        : globals.main.times[i] + globals.main.notes[i] * 1000;
+    if (
+      globals.stats.bestTime < 0 ||
+      (thisTime != -1 && thisTime < globals.stats.bestTime)
+    ) {
+      globals.stats.bestTime = thisTime;
+      globals.stats.bestTimeIndex = i;
     }
-    if (thisTime > worstTime) {
-      worstTime = thisTime;
-      worstTimeIndex = i;
+    if (thisTime > globals.stats.worstTime) {
+      globals.stats.worstTime = thisTime;
+      globals.stats.worstTimeIndex = i;
     }
     if (thisTime == -1) {
       numdnf++;
@@ -1332,35 +1335,40 @@ function getAllStats(): AllStatsWithSD {
 
     // calculate averages
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (globalVars.main.times.length - i < avgSizes2[j]) {
+      if (globals.main.times.length - i < avgSizes2[j]) {
         break;
       } else {
-        lastAvg[j] = getAvgSD(i, avgSizes2[j], true);
+        globals.stats.lastAvg[j] = getAvgSD(i, avgSizes2[j], true);
         if (
-          bestAvg[j][0] < 0 ||
-          (lastAvg[j][0] != -1 && lastAvg[j][0] < bestAvg[j][0])
+          globals.stats.bestAvg[j][0] < 0 ||
+          (globals.stats.lastAvg[j][0] != -1 &&
+            globals.stats.lastAvg[j][0] < globals.stats.bestAvg[j][0])
         ) {
-          bestAvg[j] = lastAvg[j];
-          bestAvgIndex[j] = i;
+          globals.stats.bestAvg[j] = globals.stats.lastAvg[j];
+          globals.stats.bestAvgIndex[j] = i;
         }
       }
     }
 
     // calculate mean
-    if (globalVars.main.times.length - i >= moSize) {
-      lastMo = getMeanSD(i, moSize, true);
-      if (bestMo[0] < 0 || (lastMo[0] != -1 && lastMo[0] < bestMo[0])) {
-        bestMo = lastMo;
-        bestMoIndex = i;
+    if (globals.main.times.length - i >= globals.stats.moSize) {
+      globals.stats.lastMo = getMeanSD(i, globals.stats.moSize, true);
+      if (
+        globals.stats.bestMo[0] < 0 ||
+        (globals.stats.lastMo[0] != -1 &&
+          globals.stats.lastMo[0] < globals.stats.bestMo[0])
+      ) {
+        globals.stats.bestMo = globals.stats.lastMo;
+        globals.stats.bestMoIndex = i;
       }
     }
   }
 
-  var sessionavg = getAvgWithSD(0, globalVars.main.times.length);
+  var sessionavg = getAvgWithSD(0, globals.main.times.length);
   var sessionmean =
-    numdnf == globalVars.main.times.length
+    numdnf == globals.main.times.length
       ? -1
-      : sessionsum / (globalVars.main.times.length - numdnf);
+      : sessionsum / (globals.main.times.length - numdnf);
 
   return [numdnf, sessionavg, sessionmean];
 }
@@ -1371,30 +1379,30 @@ function numsort(a, b) {
 
 function setHighlight(start, nsolves, id) {
   // if we're trying to set a highlight that has same ID as the current one, clear it.
-  if (id == globalVars.main.highlightID) {
+  if (id == globals.main.highlightID) {
     clearHighlight();
   } else {
     var mean: number = 0;
     if (id > 10 && id % 10 > 1) mean = 1; // check to see if this is a mean-of-N or not
-    globalVars.main.highlightStart = start;
-    globalVars.main.highlightStop = start + nsolves - 1;
-    globalVars.main.highlightID = id;
+    globals.main.highlightStart = start;
+    globals.main.highlightStop = start + nsolves - 1;
+    globals.main.highlightID = id;
 
-    if (globalVars.main.times.length == 0) return;
+    if (globals.main.times.length == 0) return;
     var data: AvgOrMeanWithoutSD = [0, [null], [null]];
     if (
-      globalVars.main.highlightStop != -1 &&
-      globalVars.main.highlightStop - globalVars.main.highlightStart > 1
+      globals.main.highlightStop != -1 &&
+      globals.main.highlightStop - globals.main.highlightStart > 1
     ) {
       if (mean) {
         data = getMeanWithoutSD(
-          globalVars.main.highlightStart,
-          globalVars.main.highlightStop - globalVars.main.highlightStart + 1
+          globals.main.highlightStart,
+          globals.main.highlightStop - globals.main.highlightStart + 1
         );
       } else {
         data = getAvgWithoutSD(
-          globalVars.main.highlightStart,
-          globalVars.main.highlightStop - globalVars.main.highlightStart + 1
+          globals.main.highlightStart,
+          globals.main.highlightStop - globals.main.highlightStart + 1
         );
       }
     }
@@ -1416,20 +1424,20 @@ function setHighlight(start, nsolves, id) {
       if (typedData[1].indexOf(i) > -1 || typedData[2].indexOf(i) > -1)
         s += "(";
       s +=
-        (globalVars.main.notes[start + i] == 1 ? "DNF(" : "") +
+        (globals.main.notes[start + i] == 1 ? "DNF(" : "") +
         pretty(
-          globalVars.main.times[start + i] +
-            (globalVars.main.notes[start + i] == 2 ? 2000 : 0)
+          globals.main.times[start + i] +
+            (globals.main.notes[start + i] == 2 ? 2000 : 0)
         ) +
-        (globalVars.main.notes[start + i] == 1 ? ")" : "");
+        (globals.main.notes[start + i] == 1 ? ")" : "");
       s +=
-        (globalVars.main.notes[start + i] == 2 ? "+" : "") +
-        (globalVars.main.comments[start + i]
-          ? "[" + globalVars.main.comments[start + i] + "]"
+        (globals.main.notes[start + i] == 2 ? "+" : "") +
+        (globals.main.comments[start + i]
+          ? "[" + globals.main.comments[start + i] + "]"
           : "");
       if (typedData[1].indexOf(i) > -1 || typedData[2].indexOf(i) > -1)
         s += ")";
-      s += " &nbsp; " + globalVars.main.scrambleArr[start + i] + "<br>";
+      s += " &nbsp; " + globals.main.scrambleArr[start + i] + "<br>";
     }
     $("avgdata").innerHTML = "<td colspan='3'>" + s + "</td>";
     $("avgdata").style.display = "";
@@ -1437,9 +1445,9 @@ function setHighlight(start, nsolves, id) {
 }
 
 function clearHighlight() {
-  globalVars.main.highlightStart = -1;
-  globalVars.main.highlightStop = -1;
-  globalVars.main.highlightID = -1;
+  globals.main.highlightStart = -1;
+  globals.main.highlightStop = -1;
+  globals.main.highlightID = -1;
   $("avgdata").style.display = "none";
 }
 
@@ -1472,10 +1480,10 @@ function getAvgSD(start, nsolves, SD): AvgOrMeanWithoutSD | AvgOrMeanWithSD {
     j: number;
   for (j = 0; j < nsolves; j++) {
     t =
-      globalVars.main.notes[start + j] == 1
+      globals.main.notes[start + j] == 1
         ? -1
-        : globalVars.main.times[start + j] / 10 +
-          globalVars.main.notes[start + j] * 100;
+        : globals.main.times[start + j] / 10 +
+          globals.main.notes[start + j] * 100;
     t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
@@ -1529,10 +1537,10 @@ function getMeanSD(start, nsolves, SD): AvgOrMeanWithSD | AvgOrMeanWithoutSD {
     j;
   for (j = 0; j < nsolves; j++) {
     t =
-      globalVars.main.notes[start + j] == 1
+      globals.main.notes[start + j] == 1
         ? -1
-        : globalVars.main.times[start + j] / 10 +
-          globalVars.main.notes[start + j] * 100;
+        : globals.main.times[start + j] / 10 +
+          globals.main.notes[start + j] * 100;
     t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
@@ -1613,7 +1621,7 @@ function pretty(time) {
 
 function changeNotes(i) {
   // 0 is normal solve, 1 is DNF, 2 is +2
-  globalVars.main.notes[globalVars.main.notes.length - 1] = i;
+  globals.main.notes[globals.main.notes.length - 1] = i;
   clearHighlight();
   loadList();
   getStats(true);
@@ -1622,7 +1630,7 @@ function changeNotes(i) {
 function changeAvgN() {
   var n = parseInt($<HTMLInputElement>("avglen").value);
   if (isNaN(n) || n < 3 || n > 10000) n = 50;
-  avgSizes[0] = n;
+  globals.stats.avgSizes[0] = n;
   clearHighlight();
   loadList();
   getStats(true);
@@ -1631,7 +1639,7 @@ function changeAvgN() {
 function changeMoN() {
   var n = parseInt($<HTMLInputElement>("molen").value);
   if (isNaN(n) || n < 2 || n > 10000) n = 3;
-  moSize = n;
+  globals.stats.moSize = n;
   clearHighlight();
   loadList();
   getStats(true);
@@ -1646,7 +1654,7 @@ function importTimes() {
   }
 
   // each element is either of the form (a) time, or (b) number. time scramble
-  var index = globalVars.main.times.length;
+  var index = globals.main.times.length;
   for (var i = 0; i < itimes.length; i++) {
     var t = itimes[i];
     while (t.match(/^ /)) {
@@ -1660,7 +1668,7 @@ function importTimes() {
     // get to the time-only form
     if (dot != ".") {
       // concise
-      globalVars.main.scrambleArr[index] = "";
+      globals.main.scrambleArr[index] = "";
     } else {
       // verbose
       t = t.slice(t.indexOf(". ") + 2); // get rid of time number
@@ -1677,7 +1685,7 @@ function importTimes() {
           scr = "";
         }
       }
-      globalVars.main.scrambleArr[index] = scr;
+      globals.main.scrambleArr[index] = scr;
     }
 
     // parse
@@ -1686,21 +1694,21 @@ function importTimes() {
     } // dump parens
     if (t.match(/.*\[.*\]/)) {
       // look for comments
-      globalVars.main.comments[index] = t.replace(/.*\[(.*)\]/, "$1");
+      globals.main.comments[index] = t.replace(/.*\[(.*)\]/, "$1");
       t = t.split("[")[0];
     } else {
-      globalVars.main.comments[index] = "";
+      globals.main.comments[index] = "";
     }
     if (t.match(/DNF\(.*\)/)) {
       // DNF
       t = t.replace(/DNF\((.*)\)/, "$1");
-      globalVars.main.notes[index] = 1;
+      globals.main.notes[index] = 1;
     } else if (t.match(/.*\+/)) {
       // +2
       t = t.slice(0, t.length - 1);
-      globalVars.main.notes[index] = 2;
+      globals.main.notes[index] = 2;
     } else {
-      globalVars.main.notes[index] = 0;
+      globals.main.notes[index] = 0;
     }
     parseTime(t, true);
     index++;

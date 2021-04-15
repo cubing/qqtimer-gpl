@@ -24,6 +24,22 @@ class MainGlobalVars {
   useMono: number;
 }
 
-const globalVars = {
+class StatsGlobalVars {
+  avgSizes;
+  bestAvg;
+  lastAvg;
+  bestAvgIndex;
+  bestTime;
+  bestTimeIndex;
+  worstTime;
+  worstTimeIndex;
+  moSize;
+  bestMo;
+  lastMo;
+  bestMoIndex;
+}
+
+export const globals = {
   main: new MainGlobalVars(),
+  stats: new StatsGlobalVars(),
 };
