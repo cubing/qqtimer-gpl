@@ -1,6 +1,6 @@
-import { globals, initialize } from "./qqtimer";
+import { windowGlobals, initialize } from "./qqtimer";
 
-for (const [name, fn] of Object.entries(globals)) {
+for (const [name, fn] of Object.entries(windowGlobals)) {
   globalThis[name] = fn;
 }
 

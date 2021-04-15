@@ -24,30 +24,6 @@ type AllStatsWithSD = [
 
 const setInterval = window.setInterval; // TODO
 
-var startTime: Date | undefined;
-var curTime: Date | undefined;
-var inspectionTime: Date | undefined;
-var timerStatus: 0 | 1 | 2 | 3 | 4; // 0 = stopped, 1 = running, 2 = inspecting, 3 = waiting, 4 = memo
-var times: number[] = [];
-var notes: (0 | 1 | 2)[] = [];
-var comments: string[] = [];
-var scrambleArr: string[] = [];
-// var importScrambles = []; // TODO: Remove
-var timerID: number;
-var inspectionID: number;
-var memoID: number;
-var timerupdate = 1;
-var highlightStart: number;
-var highlightStop: number;
-var highlightID: number;
-// var sessionID = 0; // TODO: Remove
-var nightMode = false;
-
-// Missing values
-let memoTime: Date; // TODO: why was this missing from the original?
-let useMoN: number;
-let useMono: number;
-
 // #################### TIMER STUFF ####################
 
 // deal with styles
@@ -70,10 +46,10 @@ export function initialize(lookForTimes, checkQueryString) {
   if (lookForTimes) {
     getSession(); // see if there is a session saved
   } else {
-    times = [];
-    notes = [];
-    comments = [];
-    scrambleArr = [];
+    globalVars.main.times = [];
+    globalVars.main.notes = [];
+    globalVars.main.comments = [];
+    globalVars.main.scrambleArr = [];
     window.focus();
   }
   showOptions = 0;
@@ -103,11 +79,11 @@ export function initialize(lookForTimes, checkQueryString) {
   worstTime = -1;
   worstTimeIndex = 0;
   clearHighlight();
-  if (timerStatus != 0) {
-    clearInterval(timerID);
-    clearInterval(inspectionID);
+  if (globalVars.main.timerStatus != 0) {
+    clearInterval(globalVars.main.timerID);
+    clearInterval(globalVars.main.inspectionID);
   }
-  timerStatus = 3;
+  globalVars.main.timerStatus = 3;
 
   let timerupdate = getCookieNumber("timerupdate", 1);
   $("toggler").innerHTML =
@@ -161,11 +137,12 @@ export function initialize(lookForTimes, checkQueryString) {
   $("bldmode").innerHTML = useBld == 1 ? "on" : "off";
   useAvgN = getCookieNumber("useAvgN", 0);
   $("avgn").innerHTML = useAvgN == 1 ? "using" : "not using";
-  useMoN = getCookieNumber("useMoN", 0);
-  $("mon").innerHTML = useMoN == 1 ? "using" : "not using";
-  useMono = getCookieNumber("useMono", 0);
-  $("monospace").innerHTML = useMono == 1 ? "on" : "off";
-  $("scramble").style.fontFamily = useMono == 1 ? "monospace" : "serif";
+  globalVars.main.useMoN = getCookieNumber("useMoN", 0);
+  $("mon").innerHTML = globalVars.main.useMoN == 1 ? "using" : "not using";
+  globalVars.main.useMono = getCookieNumber("useMono", 0);
+  $("monospace").innerHTML = globalVars.main.useMono == 1 ? "on" : "off";
+  $("scramble").style.fontFamily =
+    globalVars.main.useMono == 1 ? "monospace" : "serif";
   $("getlast").style.color = parseColor($<HTMLInputElement>("lcol").value);
   setScrambleType(getCookieWithDefault("scrType", "333"));
   if (query.length > 0) setScrambleType(query);
@@ -175,7 +152,7 @@ export function initialize(lookForTimes, checkQueryString) {
 
   initializeScramblers();
 
-  curTime = new Date(0);
+  globalVars.main.curTime = new Date(0);
   $<HTMLInputElement>("leng").value = getSelection().toString();
   var obj = $<HTMLSelectElement>("optbox");
   for (var i = 0; i < scrdata.length; i++) {
@@ -239,79 +216,103 @@ function loadOptBoxes() {
 
 function startTimer(keyCode) {
   if (
-    timerStatus == 0 &&
+    globalVars.main.timerStatus == 0 &&
     manualEnter == 0 &&
     keyCode == 32 &&
     importFocus == 0
   ) {
-    timerStatus = 3;
+    globalVars.main.timerStatus = 3;
   } else if (
-    timerStatus == 3 &&
+    globalVars.main.timerStatus == 3 &&
     manualEnter == 0 &&
     keyCode == 32 &&
-    new Date().getTime() - curTime.getTime() >= 300 &&
+    new Date().getTime() - globalVars.main.curTime.getTime() >= 300 &&
     importFocus == 0
   ) {
     if (getScrambleType() == "sqrs") {
       $("scramble").innerHTML = "scramble: loading... ";
     }
     if (inspection == 1) {
-      timerStatus = 2;
-      inspectionTime = new Date();
+      globalVars.main.timerStatus = 2;
+      globalVars.main.inspectionTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = "red";
-      if (timerupdate != 0) {
-        inspectionID = setInterval(updateInspec, timerupdate == 1 ? 10 : 100);
+      if (globalVars.main.timerupdate != 0) {
+        globalVars.main.inspectionID = setInterval(
+          updateInspec,
+          globalVars.main.timerupdate == 1 ? 10 : 100
+        );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "inspecting";
       }
     } else if (useBld == 1) {
-      timerStatus = 4;
-      memoTime = new Date();
+      globalVars.main.timerStatus = 4;
+      globalVars.main.memoTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = $<HTMLInputElement>(
         "memcol"
       ).value;
-      if (timerupdate == 1 || timerupdate == 2) {
-        memoID = setInterval(updateMemo, timerupdate == 1 ? 10 : 100);
+      if (
+        globalVars.main.timerupdate == 1 ||
+        globalVars.main.timerupdate == 2
+      ) {
+        globalVars.main.memoID = setInterval(
+          updateMemo,
+          globalVars.main.timerupdate == 1 ? 10 : 100
+        );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "memorizing";
       }
     } else {
-      timerStatus = 1;
-      startTime = new Date();
+      globalVars.main.timerStatus = 1;
+      globalVars.main.startTime = new Date();
       penalty = 0;
-      $<HTMLSpanElement>("theTime").style.color = nightMode
+      $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
         ? "#fff"
         : $<HTMLInputElement>("fcol").value;
-      if (timerupdate == 1 || timerupdate == 2) {
-        timerID = setInterval(updateTimer, timerupdate == 1 ? 10 : 100);
+      if (
+        globalVars.main.timerupdate == 1 ||
+        globalVars.main.timerupdate == 2
+      ) {
+        globalVars.main.timerID = setInterval(
+          updateTimer,
+          globalVars.main.timerupdate == 1 ? 10 : 100
+        );
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "running";
       }
     }
-  } else if (timerStatus == 4 && keyCode == 32) {
-    timerStatus = 1;
-    startTime = new Date();
-    $<HTMLSpanElement>("theTime").style.color = nightMode
+  } else if (globalVars.main.timerStatus == 4 && keyCode == 32) {
+    globalVars.main.timerStatus = 1;
+    globalVars.main.startTime = new Date();
+    $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
       ? "#fff"
       : $<HTMLInputElement>("fcol").value;
-    var memoLength = startTime.getTime() - memoTime.getTime();
-    if (timerupdate == 1 || timerupdate == 2) {
-      clearInterval(memoID);
-      timerID = setInterval(updateMemo, timerupdate == 1 ? 10 : 100);
+    var memoLength =
+      globalVars.main.startTime.getTime() - globalVars.main.memoTime.getTime();
+    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
+      clearInterval(globalVars.main.memoID);
+      globalVars.main.timerID = setInterval(
+        updateMemo,
+        globalVars.main.timerupdate == 1 ? 10 : 100
+      );
     } else {
       $<HTMLSpanElement>("theTime").innerHTML = "running";
     }
-  } else if (timerStatus == 2 && keyCode == 32) {
-    timerStatus = 1;
-    startTime = new Date();
-    $<HTMLSpanElement>("theTime").style.color = nightMode
+  } else if (globalVars.main.timerStatus == 2 && keyCode == 32) {
+    globalVars.main.timerStatus = 1;
+    globalVars.main.startTime = new Date();
+    $<HTMLSpanElement>("theTime").style.color = globalVars.main.nightMode
       ? "#fff"
       : $<HTMLInputElement>("fcol").value;
-    var inspecLength = startTime.getTime() - inspectionTime.getTime();
+    var inspecLength =
+      globalVars.main.startTime.getTime() -
+      globalVars.main.inspectionTime.getTime();
     penalty = inspecLength < 15000 ? 0 : inspecLength < 17000 ? 2 : 1;
-    clearInterval(inspectionID);
-    if (timerupdate == 1 || timerupdate == 2) {
-      timerID = setInterval(updateTimer, timerupdate == 1 ? 10 : 100);
+    clearInterval(globalVars.main.inspectionID);
+    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
+      globalVars.main.timerID = setInterval(
+        updateTimer,
+        globalVars.main.timerupdate == 1 ? 10 : 100
+      );
     } else {
       $<HTMLSpanElement>("theTime").innerHTML = "running";
     }
@@ -332,7 +333,9 @@ function stopTimer(keyCode?: number) {
         nonzero = parseTime(timeStr.replace(/(.*) .*/, "$1"), true);
         if (nonzero) {
           // if time breaks, ignore comments/notes
-          comments[times.length - 1] = timeStr.replace(/.*? (.*)$/, "$1");
+          globalVars.main.comments[
+            globalVars.main.times.length - 1
+          ] = timeStr.replace(/.*? (.*)$/, "$1");
         }
       } else if (timeStr.match(dnfRegex)) {
         nonzero = parseTime(dnfRegex.exec(timeStr)[2]);
@@ -341,26 +344,31 @@ function stopTimer(keyCode?: number) {
       }
       if (nonzero) {
         if (timeStr.match(/.*(DNF|dnf).*/)) {
-          notes[times.length - 1] = 1;
+          globalVars.main.notes[globalVars.main.times.length - 1] = 1;
         } else if (timeStr.match(/.*\+.*/)) {
-          notes[times.length - 1] = 2;
+          globalVars.main.notes[globalVars.main.times.length - 1] = 2;
         } else {
-          notes[times.length - 1] = 0;
+          globalVars.main.notes[globalVars.main.times.length - 1] = 0;
         }
         loadList(); // unfortunately have to do this twice ;|
         getStats(false);
       }
       $<HTMLInputElement>("timeEntry").value = "";
-      if (nonzero) scrambleArr[scrambleArr.length] = getScramble();
+      if (nonzero)
+        globalVars.main.scrambleArr[
+          globalVars.main.scrambleArr.length
+        ] = getScramble();
       rescramble3();
     }
-  } else if (timerStatus == 1) {
-    timerStatus = keyCode == 32 ? 0 : 3;
-    if (timerupdate == 1 || timerupdate == 2) {
-      clearInterval(timerID);
+  } else if (globalVars.main.timerStatus == 1) {
+    globalVars.main.timerStatus = keyCode == 32 ? 0 : 3;
+    if (globalVars.main.timerupdate == 1 || globalVars.main.timerupdate == 2) {
+      clearInterval(globalVars.main.timerID);
     }
     getTime(penalty);
-    scrambleArr[scrambleArr.length] = getScramble();
+    globalVars.main.scrambleArr[
+      globalVars.main.scrambleArr.length
+    ] = getScramble();
     rescramble3();
   }
 }
@@ -368,20 +376,22 @@ function stopTimer(keyCode?: number) {
 function checkKey(keyCode, shiftKey) {
   if (
     keyCode == 13 ||
-    (manualEnter == 0 && timerStatus != 0 && timerStatus != 3)
+    (manualEnter == 0 &&
+      globalVars.main.timerStatus != 0 &&
+      globalVars.main.timerStatus != 3)
   ) {
     // normally, any key enters a time; with manual enter, only Enter does
     stopTimer(keyCode);
   } else if (keyCode == 8 && manualEnter == 0) {
     // backspace applies DNF
-    if (notes[notes.length - 1] == 1) {
+    if (globalVars.main.notes[globalVars.main.notes.length - 1] == 1) {
       changeNotes(0);
     } else {
       changeNotes(1);
     }
   } else if ((keyCode == 61 || keyCode == 187) && manualEnter == 0) {
     // +/= applies +2 penalty
-    if (notes[notes.length - 1] == 2) {
+    if (globalVars.main.notes[globalVars.main.notes.length - 1] == 2) {
       changeNotes(0);
     } else {
       changeNotes(2);
@@ -389,9 +399,9 @@ function checkKey(keyCode, shiftKey) {
   } else if (keyCode == 173 || keyCode == 189) {
     // -/_ applies no penalty
     changeNotes(0);
-  } else if (keyCode == 46 && !shiftKey && times.length > 0) {
+  } else if (keyCode == 46 && !shiftKey && globalVars.main.times.length > 0) {
     // delete removes last solve
-    del(times.length - 1);
+    del(globalVars.main.times.length - 1);
   } else if (keyCode == 46 && shiftKey) {
     // shift+delete clears session
     resetTimes();
@@ -399,9 +409,10 @@ function checkKey(keyCode, shiftKey) {
 }
 
 function updateTimer() {
-  curTime = new Date();
-  var time = curTime.getTime() - startTime.getTime();
-  if (timerupdate == 1) {
+  globalVars.main.curTime = new Date();
+  var time =
+    globalVars.main.curTime.getTime() - globalVars.main.startTime.getTime();
+  if (globalVars.main.timerupdate == 1) {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   } else {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time).split(".")[0];
@@ -409,9 +420,10 @@ function updateTimer() {
 }
 
 function updateMemo() {
-  curTime = new Date();
-  var time = curTime.getTime() - memoTime.getTime();
-  if (timerupdate == 1) {
+  globalVars.main.curTime = new Date();
+  var time =
+    globalVars.main.curTime.getTime() - globalVars.main.memoTime.getTime();
+  if (globalVars.main.timerupdate == 1) {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   } else {
     $<HTMLSpanElement>("theTime").innerHTML = pretty(time).split(".")[0];
@@ -419,8 +431,10 @@ function updateMemo() {
 }
 
 function updateInspec() {
-  curTime = new Date();
-  var time = curTime.getTime() - inspectionTime.getTime();
+  globalVars.main.curTime = new Date();
+  var time =
+    globalVars.main.curTime.getTime() -
+    globalVars.main.inspectionTime.getTime();
   $<HTMLSpanElement>("theTime").textContent =
     time > 17000
       ? "DNF"
@@ -430,20 +444,23 @@ function updateInspec() {
 }
 
 function getTime(note) {
-  curTime = new Date();
+  globalVars.main.curTime = new Date();
 
   if (useBld == 1) {
-    var time = curTime.getTime() - memoTime.getTime();
-    var mtime = startTime.getTime() - memoTime.getTime();
+    var time =
+      globalVars.main.curTime.getTime() - globalVars.main.memoTime.getTime();
+    var mtime =
+      globalVars.main.startTime.getTime() - globalVars.main.memoTime.getTime();
   } else {
-    var time = curTime.getTime() - startTime.getTime();
+    var time =
+      globalVars.main.curTime.getTime() - globalVars.main.startTime.getTime();
   }
-  times[times.length] = time;
-  notes[notes.length] = note;
+  globalVars.main.times[globalVars.main.times.length] = time;
+  globalVars.main.notes[globalVars.main.notes.length] = note;
   if (useBld == 1) {
-    comments[comments.length] = pretty(mtime);
+    globalVars.main.comments[globalVars.main.comments.length] = pretty(mtime);
   } else {
-    comments[comments.length] = "";
+    globalVars.main.comments[globalVars.main.comments.length] = "";
   }
   $<HTMLSpanElement>("theTime").innerHTML = pretty(time);
   clearHighlight();
@@ -469,12 +486,12 @@ function parseTime(s: string, importing: boolean = false) {
   if (time != 0) {
     // don't insert zero-times
     if (!importing) {
-      notes[notes.length] = 0;
-      comments[comments.length] = "";
-    } else if (notes[times.length] == 2) {
+      globalVars.main.notes[globalVars.main.notes.length] = 0;
+      globalVars.main.comments[globalVars.main.comments.length] = "";
+    } else if (globalVars.main.notes[globalVars.main.times.length] == 2) {
       time -= 2000;
     }
-    times[times.length] = time;
+    globalVars.main.times[globalVars.main.times.length] = time;
     if (!importing) {
       clearHighlight();
       loadList();
@@ -497,36 +514,43 @@ function loadList() {
   var s =
     "times (<span onclick='resetTimes();' class='a'>reset</span>, <span onclick='toggleImport();' class='a'>import</span>):<br>";
   // get the best and worst time for the highlighted average
-  if (highlightStop != -1 && highlightStop - highlightStart > 1) {
+  if (
+    globalVars.main.highlightStop != -1 &&
+    globalVars.main.highlightStop - globalVars.main.highlightStart > 1
+  ) {
     var mean = 0;
-    if (highlightID > 10 && highlightID % 10 > 1) mean = 1; // check to see if this is a mean-of-N or not
+    if (
+      globalVars.main.highlightID > 10 &&
+      globalVars.main.highlightID % 10 > 1
+    )
+      mean = 1; // check to see if this is a mean-of-N or not
     if (mean) {
       data = getMeanSD(
-        highlightStart,
-        highlightStop - highlightStart + 1,
+        globalVars.main.highlightStart,
+        globalVars.main.highlightStop - globalVars.main.highlightStart + 1,
         false
       );
     } else {
       data = getAvgSD(
-        highlightStart,
-        highlightStop - highlightStart + 1,
+        globalVars.main.highlightStart,
+        globalVars.main.highlightStop - globalVars.main.highlightStart + 1,
         false
       );
     }
   }
-  for (var i = 0; i < times.length; i++) {
-    if (i == highlightStart) {
+  for (var i = 0; i < globalVars.main.times.length; i++) {
+    if (i == globalVars.main.highlightStart) {
       s += "<span style='background-color: " + highlightColor + "'>";
     }
     if (
-      data[1].indexOf(i - highlightStart) > -1 ||
-      data[2].indexOf(i - highlightStart) > -1
+      data[1].indexOf(i - globalVars.main.highlightStart) > -1 ||
+      data[2].indexOf(i - globalVars.main.highlightStart) > -1
     )
       s += "(";
-    var time = times[i];
-    if (notes[i] == 0) {
+    var time = globalVars.main.times[i];
+    if (globalVars.main.notes[i] == 0) {
       s += "<span onclick='del(" + i + ");' class='b'>" + pretty(time);
-    } else if (notes[i] == 2) {
+    } else if (globalVars.main.notes[i] == 2) {
       s +=
         "<span onclick='del(" +
         i +
@@ -537,16 +561,19 @@ function loadList() {
       s +=
         "<span onclick='del(" + i + ");' class='b'>DNF(" + pretty(time) + ")";
     }
-    s += (comments[i] ? "[" + comments[i] + "]" : "") + "</span>";
+    s +=
+      (globalVars.main.comments[i]
+        ? "[" + globalVars.main.comments[i] + "]"
+        : "") + "</span>";
     if (
-      data[1].indexOf(i - highlightStart) > -1 ||
-      data[2].indexOf(i - highlightStart) > -1
+      data[1].indexOf(i - globalVars.main.highlightStart) > -1 ||
+      data[2].indexOf(i - globalVars.main.highlightStart) > -1
     )
       s += ")";
-    if (i == highlightStop) {
+    if (i == globalVars.main.highlightStop) {
       s += "</span>";
     }
-    s += i == times.length - 1 ? " " : ", ";
+    s += i == globalVars.main.times.length - 1 ? " " : ", ";
   }
   $("theList").innerHTML = s;
   saveSession();
@@ -557,20 +584,21 @@ function loadList() {
 }
 
 function del(index) {
-  var prettyTime = pretty(times[index]);
-  if (notes[index] == 1) prettyTime = "DNF(" + prettyTime + ")";
-  if (notes[index] == 2) prettyTime = pretty(times[index] + 2000) + "+";
+  var prettyTime = pretty(globalVars.main.times[index]);
+  if (globalVars.main.notes[index] == 1) prettyTime = "DNF(" + prettyTime + ")";
+  if (globalVars.main.notes[index] == 2)
+    prettyTime = pretty(globalVars.main.times[index] + 2000) + "+";
   if (confirm("Are you sure you want to delete the " + prettyTime + "?")) {
-    for (var i = index; i < times.length - 1; i++) {
-      times[i] = times[i + 1];
-      notes[i] = notes[i + 1];
-      comments[i] = comments[i + 1];
-      scrambleArr[i] = scrambleArr[i + 1];
+    for (var i = index; i < globalVars.main.times.length - 1; i++) {
+      globalVars.main.times[i] = globalVars.main.times[i + 1];
+      globalVars.main.notes[i] = globalVars.main.notes[i + 1];
+      globalVars.main.comments[i] = globalVars.main.comments[i + 1];
+      globalVars.main.scrambleArr[i] = globalVars.main.scrambleArr[i + 1];
     }
-    times.pop();
-    notes.pop();
-    comments.pop();
-    scrambleArr.pop();
+    globalVars.main.times.pop();
+    globalVars.main.notes.pop();
+    globalVars.main.comments.pop();
+    globalVars.main.scrambleArr.pop();
     clearHighlight();
     loadList();
     getStats(true);
@@ -586,12 +614,12 @@ function getlastscramble() {
 function comment() {
   var newComment = prompt(
     "Enter your comment for the most recent solve:",
-    comments[comments.length - 1]
+    globalVars.main.comments[globalVars.main.comments.length - 1]
   );
   if (newComment != null) {
-    comments[comments.length - 1] = newComment;
+    globalVars.main.comments[globalVars.main.comments.length - 1] = newComment;
   } else {
-    comments[comments.length - 1] = "";
+    globalVars.main.comments[globalVars.main.comments.length - 1] = "";
   }
   loadList();
 }
@@ -669,14 +697,14 @@ function toggleImport() {
 
 function toggleTimer() {
   stopTimer();
-  timerupdate = (timerupdate + 1) % 4;
-  setCookie("timerupdate", timerupdate);
+  globalVars.main.timerupdate = (globalVars.main.timerupdate + 1) % 4;
+  setCookie("timerupdate", globalVars.main.timerupdate);
   $("toggler").innerHTML =
-    timerupdate == 0
+    globalVars.main.timerupdate == 0
       ? "off"
-      : timerupdate == 1
+      : globalVars.main.timerupdate == 1
       ? "on"
-      : timerupdate == 2
+      : globalVars.main.timerupdate == 2
       ? "seconds only"
       : "inspection only";
 }
@@ -698,10 +726,11 @@ function toggleBld() {
 }
 
 function toggleMono() {
-  useMono = 1 - useMono;
-  setCookie("useMono", useMono);
-  $("monospace").innerHTML = useMono == 1 ? "on" : "off";
-  $("scramble").style.fontFamily = useMono == 1 ? "monospace" : "serif";
+  globalVars.main.useMono = 1 - globalVars.main.useMono;
+  setCookie("useMono", globalVars.main.useMono);
+  $("monospace").innerHTML = globalVars.main.useMono == 1 ? "on" : "off";
+  $("scramble").style.fontFamily =
+    globalVars.main.useMono == 1 ? "monospace" : "serif";
   $("getlast").style.color = parseColor($<HTMLInputElement>("lcol").value);
 }
 
@@ -783,9 +812,9 @@ function toggleAvgN() {
 }
 
 function toggleMoN() {
-  useMoN = 1 - useMoN;
-  setCookie("useMoN", useMoN);
-  $("mon").innerHTML = useMoN == 1 ? "using" : "not using";
+  globalVars.main.useMoN = 1 - globalVars.main.useMoN;
+  setCookie("useMoN", globalVars.main.useMoN);
+  $("mon").innerHTML = globalVars.main.useMoN == 1 ? "using" : "not using";
   getStats(true);
 }
 
@@ -798,7 +827,7 @@ function changeColor() {
   ($("menu") as HTMLTableCellElement).bgColor = parseColor(
     $<HTMLInputElement>("tcol").value
   );
-  if (nightMode) {
+  if (globalVars.main.nightMode) {
     document.bgColor = "#000";
     document.body.style.color = "#fff";
   } else {
@@ -855,8 +884,8 @@ function resetColors() {
 }
 
 function toggleNightMode() {
-  nightMode = !nightMode;
-  if (nightMode) {
+  globalVars.main.nightMode = !globalVars.main.nightMode;
+  if (globalVars.main.nightMode) {
     document.bgColor = "#000";
     document.body.style.color = "#fff";
     $<HTMLSpanElement>("theTime").style.color = "#fff";
@@ -966,14 +995,17 @@ function saveSession() {
 
   if (window.localStorage !== undefined) {
     var value = "";
-    for (var i = 0; i < times.length; i++) {
-      value += times[i];
-      if (comments[i] != "" && comments[i] !== null) {
-        value += "|" + comments[i];
+    for (var i = 0; i < globalVars.main.times.length; i++) {
+      value += globalVars.main.times[i];
+      if (
+        globalVars.main.comments[i] != "" &&
+        globalVars.main.comments[i] !== null
+      ) {
+        value += "|" + globalVars.main.comments[i];
       }
-      if (notes[i] == 1) value += "-";
-      if (notes[i] == 2) value += "+";
-      if (i < times.length - 1) value += ",";
+      if (globalVars.main.notes[i] == 1) value += "-";
+      if (globalVars.main.notes[i] == 2) value += "+";
+      if (i < globalVars.main.times.length - 1) value += ",";
     }
     value += ">";
 
@@ -988,16 +1020,19 @@ function saveSession() {
   var expires = "; expires=" + new Date(3000, 0, 1).toUTCString() + "; path=/";
   var cnt = 1;
   var s = name + "|" + cnt + "=";
-  for (var i = 0; i < times.length; i++) {
+  for (var i = 0; i < globalVars.main.times.length; i++) {
     if (s.length < 3950) {
       // just in case!
-      s += times[i];
-      if (comments[i] != "" && comments[i] !== null) {
-        s += "|" + comments[i];
+      s += globalVars.main.times[i];
+      if (
+        globalVars.main.comments[i] != "" &&
+        globalVars.main.comments[i] !== null
+      ) {
+        s += "|" + globalVars.main.comments[i];
       }
-      if (notes[i] == 1) s += "-";
-      if (notes[i] == 2) s += "+";
-      if (i < times.length - 1) s += ",";
+      if (globalVars.main.notes[i] == 1) s += "-";
+      if (globalVars.main.notes[i] == 2) s += "+";
+      if (i < globalVars.main.times.length - 1) s += ",";
     } else {
       document.cookie = s + expires;
       cnt++;
@@ -1013,10 +1048,10 @@ function getSession() {
     $<HTMLSelectElement>("sessbox").selectedIndex == null
       ? 0
       : $<HTMLSelectElement>("sessbox").selectedIndex;
-  times = [];
-  notes = [];
-  comments = [];
-  scrambleArr = [];
+  globalVars.main.times = [];
+  globalVars.main.notes = [];
+  globalVars.main.comments = [];
+  globalVars.main.scrambleArr = [];
   $("sessbox").blur();
 
   var s = null;
@@ -1064,18 +1099,18 @@ function getSession() {
         t[j] = t[j].slice(0, t[j].length - 1);
       }
       if (t[j].slice(-1) == "-") {
-        notes[j] = 1;
+        globalVars.main.notes[j] = 1;
         t[j] = t[j].slice(0, t[j].length - 1);
       } else if (t[j].slice(-1) == "+") {
-        notes[j] = 2;
+        globalVars.main.notes[j] = 2;
         t[j] = t[j].slice(0, t[j].length - 1);
       } else {
-        notes[j] = 0;
+        globalVars.main.notes[j] = 0;
       }
       var q = t[j].split("|");
-      times[j] = parseInt(q[0]);
-      comments[j] = q[1] != null && q[1] != "" ? q[1] : "";
-      scrambleArr[j] = "";
+      globalVars.main.times[j] = parseInt(q[0]);
+      globalVars.main.comments[j] = q[1] != null && q[1] != "" ? q[1] : "";
+      globalVars.main.scrambleArr[j] = "";
     }
   }
   clearHighlight();
@@ -1099,8 +1134,11 @@ function getStats(recalc) {
     sessionmean = theStats[2];
   } else {
     // update averages and best time / worst time.
-    var index = times.length - 1;
-    var thisTime = notes[index] == 1 ? -1 : times[index] + notes[index] * 1000;
+    var index = globalVars.main.times.length - 1;
+    var thisTime =
+      globalVars.main.notes[index] == 1
+        ? -1
+        : globalVars.main.times[index] + globalVars.main.notes[index] * 1000;
     if (bestTime < 0 || (thisTime != -1 && thisTime < bestTime)) {
       bestTime = thisTime;
       bestTimeIndex = index;
@@ -1110,45 +1148,58 @@ function getStats(recalc) {
       worstTimeIndex = index;
     }
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (times.length < avgSizes2[j]) {
+      if (globalVars.main.times.length < avgSizes2[j]) {
         break;
       } else {
-        lastAvg[j] = getAvgSD(times.length - avgSizes2[j], avgSizes2[j], true);
+        lastAvg[j] = getAvgSD(
+          globalVars.main.times.length - avgSizes2[j],
+          avgSizes2[j],
+          true
+        );
         if (
           bestAvg[j][0] < 0 ||
           (lastAvg[j][0] != -1 && lastAvg[j][0] < bestAvg[j][0])
         ) {
           bestAvg[j] = lastAvg[j];
-          bestAvgIndex[j] = times.length - avgSizes2[j];
+          bestAvgIndex[j] = globalVars.main.times.length - avgSizes2[j];
         }
       }
     }
-    if (times.length >= moSize) {
-      lastMo = getMeanSD(times.length - moSize, moSize, true);
+    if (globalVars.main.times.length >= moSize) {
+      lastMo = getMeanSD(globalVars.main.times.length - moSize, moSize, true);
       if (bestMo[0] < 0 || (lastMo[0] != -1 && lastMo[0] < bestMo[0])) {
         bestMo = lastMo;
-        bestMoIndex = times.length - moSize;
+        bestMoIndex = globalVars.main.times.length - moSize;
       }
     }
     var sessionsum = 0;
-    for (var i = 0; i < times.length; i++) {
-      var thisTime = notes[i] == 1 ? -1 : times[i] + notes[i] * 1000;
+    for (var i = 0; i < globalVars.main.times.length; i++) {
+      var thisTime =
+        globalVars.main.notes[i] == 1
+          ? -1
+          : globalVars.main.times[i] + globalVars.main.notes[i] * 1000;
       if (thisTime == -1) {
         numdnf++;
       } else {
         sessionsum += thisTime;
       }
     }
-    sessionavg = getAvgSD(0, times.length, true);
+    sessionavg = getAvgSD(0, globalVars.main.times.length, true);
     sessionmean =
-      numdnf == times.length ? -1 : sessionsum / (times.length - numdnf);
+      numdnf == globalVars.main.times.length
+        ? -1
+        : sessionsum / (globalVars.main.times.length - numdnf);
   }
 
   var s =
     "stats: (<span id='hidestats' onclick='toggleStatView()' class='a'>" +
     (viewstats ? "hide" : "show") +
     "</span>)<br>";
-  s += "number of times: " + (times.length - numdnf) + "/" + times.length;
+  s +=
+    "number of times: " +
+    (globalVars.main.times.length - numdnf) +
+    "/" +
+    globalVars.main.times.length;
   if (viewstats) {
     s +=
       "<br>best time: <span onclick='setHighlight(" +
@@ -1159,13 +1210,13 @@ function getStats(recalc) {
       "</span><br>worst time: <span onclick='setHighlight(" +
       worstTimeIndex;
     s += ",1,1);loadList();' class='a'>" + pretty(worstTime) + "</span><br>";
-    if (useMoN == 1) {
-      if (times.length >= moSize) {
+    if (globalVars.main.useMoN == 1) {
+      if (globalVars.main.times.length >= moSize) {
         s +=
           "<br>current mo" +
           moSize +
           ": <span onclick='setHighlight(" +
-          (times.length - moSize);
+          (globalVars.main.times.length - moSize);
         s +=
           "," +
           moSize +
@@ -1187,12 +1238,12 @@ function getStats(recalc) {
       }
     }
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (times.length >= avgSizes2[j]) {
+      if (globalVars.main.times.length >= avgSizes2[j]) {
         s +=
           "<br>current avg" +
           avgSizes2[j] +
           ": <span onclick='setHighlight(" +
-          (times.length - avgSizes2[j]);
+          (globalVars.main.times.length - avgSizes2[j]);
         s +=
           "," +
           avgSizes2[j] +
@@ -1219,7 +1270,7 @@ function getStats(recalc) {
 
     s +=
       "<br>session avg: <span onclick='setHighlight(0," +
-      times.length +
+      globalVars.main.times.length +
       ",2);loadList();' class='a'>";
     s +=
       pretty(sessionavg[0]) +
@@ -1260,8 +1311,11 @@ function getAllStats(): AllStatsWithSD {
   bestMo = [-1, 0];
   lastMo = [-1, 0];
   bestMoIndex = 0;
-  for (var i = 0; i < times.length; i++) {
-    var thisTime = notes[i] == 1 ? -1 : times[i] + notes[i] * 1000;
+  for (var i = 0; i < globalVars.main.times.length; i++) {
+    var thisTime =
+      globalVars.main.notes[i] == 1
+        ? -1
+        : globalVars.main.times[i] + globalVars.main.notes[i] * 1000;
     if (bestTime < 0 || (thisTime != -1 && thisTime < bestTime)) {
       bestTime = thisTime;
       bestTimeIndex = i;
@@ -1278,7 +1332,7 @@ function getAllStats(): AllStatsWithSD {
 
     // calculate averages
     for (var j = 0; j < avgSizes2.length; j++) {
-      if (times.length - i < avgSizes2[j]) {
+      if (globalVars.main.times.length - i < avgSizes2[j]) {
         break;
       } else {
         lastAvg[j] = getAvgSD(i, avgSizes2[j], true);
@@ -1293,7 +1347,7 @@ function getAllStats(): AllStatsWithSD {
     }
 
     // calculate mean
-    if (times.length - i >= moSize) {
+    if (globalVars.main.times.length - i >= moSize) {
       lastMo = getMeanSD(i, moSize, true);
       if (bestMo[0] < 0 || (lastMo[0] != -1 && lastMo[0] < bestMo[0])) {
         bestMo = lastMo;
@@ -1302,9 +1356,11 @@ function getAllStats(): AllStatsWithSD {
     }
   }
 
-  var sessionavg = getAvgWithSD(0, times.length);
+  var sessionavg = getAvgWithSD(0, globalVars.main.times.length);
   var sessionmean =
-    numdnf == times.length ? -1 : sessionsum / (times.length - numdnf);
+    numdnf == globalVars.main.times.length
+      ? -1
+      : sessionsum / (globalVars.main.times.length - numdnf);
 
   return [numdnf, sessionavg, sessionmean];
 }
@@ -1315,27 +1371,30 @@ function numsort(a, b) {
 
 function setHighlight(start, nsolves, id) {
   // if we're trying to set a highlight that has same ID as the current one, clear it.
-  if (id == highlightID) {
+  if (id == globalVars.main.highlightID) {
     clearHighlight();
   } else {
     var mean: number = 0;
     if (id > 10 && id % 10 > 1) mean = 1; // check to see if this is a mean-of-N or not
-    highlightStart = start;
-    highlightStop = start + nsolves - 1;
-    highlightID = id;
+    globalVars.main.highlightStart = start;
+    globalVars.main.highlightStop = start + nsolves - 1;
+    globalVars.main.highlightID = id;
 
-    if (times.length == 0) return;
+    if (globalVars.main.times.length == 0) return;
     var data: AvgOrMeanWithoutSD = [0, [null], [null]];
-    if (highlightStop != -1 && highlightStop - highlightStart > 1) {
+    if (
+      globalVars.main.highlightStop != -1 &&
+      globalVars.main.highlightStop - globalVars.main.highlightStart > 1
+    ) {
       if (mean) {
         data = getMeanWithoutSD(
-          highlightStart,
-          highlightStop - highlightStart + 1
+          globalVars.main.highlightStart,
+          globalVars.main.highlightStop - globalVars.main.highlightStart + 1
         );
       } else {
         data = getAvgWithoutSD(
-          highlightStart,
-          highlightStop - highlightStart + 1
+          globalVars.main.highlightStart,
+          globalVars.main.highlightStop - globalVars.main.highlightStart + 1
         );
       }
     }
@@ -1357,15 +1416,20 @@ function setHighlight(start, nsolves, id) {
       if (typedData[1].indexOf(i) > -1 || typedData[2].indexOf(i) > -1)
         s += "(";
       s +=
-        (notes[start + i] == 1 ? "DNF(" : "") +
-        pretty(times[start + i] + (notes[start + i] == 2 ? 2000 : 0)) +
-        (notes[start + i] == 1 ? ")" : "");
+        (globalVars.main.notes[start + i] == 1 ? "DNF(" : "") +
+        pretty(
+          globalVars.main.times[start + i] +
+            (globalVars.main.notes[start + i] == 2 ? 2000 : 0)
+        ) +
+        (globalVars.main.notes[start + i] == 1 ? ")" : "");
       s +=
-        (notes[start + i] == 2 ? "+" : "") +
-        (comments[start + i] ? "[" + comments[start + i] + "]" : "");
+        (globalVars.main.notes[start + i] == 2 ? "+" : "") +
+        (globalVars.main.comments[start + i]
+          ? "[" + globalVars.main.comments[start + i] + "]"
+          : "");
       if (typedData[1].indexOf(i) > -1 || typedData[2].indexOf(i) > -1)
         s += ")";
-      s += " &nbsp; " + scrambleArr[start + i] + "<br>";
+      s += " &nbsp; " + globalVars.main.scrambleArr[start + i] + "<br>";
     }
     $("avgdata").innerHTML = "<td colspan='3'>" + s + "</td>";
     $("avgdata").style.display = "";
@@ -1373,9 +1437,9 @@ function setHighlight(start, nsolves, id) {
 }
 
 function clearHighlight() {
-  highlightStart = -1;
-  highlightStop = -1;
-  highlightID = -1;
+  globalVars.main.highlightStart = -1;
+  globalVars.main.highlightStop = -1;
+  globalVars.main.highlightID = -1;
   $("avgdata").style.display = "none";
 }
 
@@ -1408,9 +1472,10 @@ function getAvgSD(start, nsolves, SD): AvgOrMeanWithoutSD | AvgOrMeanWithSD {
     j: number;
   for (j = 0; j < nsolves; j++) {
     t =
-      notes[start + j] == 1
+      globalVars.main.notes[start + j] == 1
         ? -1
-        : times[start + j] / 10 + notes[start + j] * 100;
+        : globalVars.main.times[start + j] / 10 +
+          globalVars.main.notes[start + j] * 100;
     t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
@@ -1464,9 +1529,10 @@ function getMeanSD(start, nsolves, SD): AvgOrMeanWithSD | AvgOrMeanWithoutSD {
     j;
   for (j = 0; j < nsolves; j++) {
     t =
-      notes[start + j] == 1
+      globalVars.main.notes[start + j] == 1
         ? -1
-        : times[start + j] / 10 + notes[start + j] * 100;
+        : globalVars.main.times[start + j] / 10 +
+          globalVars.main.notes[start + j] * 100;
     t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
@@ -1547,7 +1613,7 @@ function pretty(time) {
 
 function changeNotes(i) {
   // 0 is normal solve, 1 is DNF, 2 is +2
-  notes[notes.length - 1] = i;
+  globalVars.main.notes[globalVars.main.notes.length - 1] = i;
   clearHighlight();
   loadList();
   getStats(true);
@@ -1580,7 +1646,7 @@ function importTimes() {
   }
 
   // each element is either of the form (a) time, or (b) number. time scramble
-  var index = times.length;
+  var index = globalVars.main.times.length;
   for (var i = 0; i < itimes.length; i++) {
     var t = itimes[i];
     while (t.match(/^ /)) {
@@ -1594,7 +1660,7 @@ function importTimes() {
     // get to the time-only form
     if (dot != ".") {
       // concise
-      scrambleArr[index] = "";
+      globalVars.main.scrambleArr[index] = "";
     } else {
       // verbose
       t = t.slice(t.indexOf(". ") + 2); // get rid of time number
@@ -1611,7 +1677,7 @@ function importTimes() {
           scr = "";
         }
       }
-      scrambleArr[index] = scr;
+      globalVars.main.scrambleArr[index] = scr;
     }
 
     // parse
@@ -1620,21 +1686,21 @@ function importTimes() {
     } // dump parens
     if (t.match(/.*\[.*\]/)) {
       // look for comments
-      comments[index] = t.replace(/.*\[(.*)\]/, "$1");
+      globalVars.main.comments[index] = t.replace(/.*\[(.*)\]/, "$1");
       t = t.split("[")[0];
     } else {
-      comments[index] = "";
+      globalVars.main.comments[index] = "";
     }
     if (t.match(/DNF\(.*\)/)) {
       // DNF
       t = t.replace(/DNF\((.*)\)/, "$1");
-      notes[index] = 1;
+      globalVars.main.notes[index] = 1;
     } else if (t.match(/.*\+/)) {
       // +2
       t = t.slice(0, t.length - 1);
-      notes[index] = 2;
+      globalVars.main.notes[index] = 2;
     } else {
-      notes[index] = 0;
+      globalVars.main.notes[index] = 0;
     }
     parseTime(t, true);
     index++;
@@ -1647,7 +1713,7 @@ function importTimes() {
   getStats(true);
 }
 
-export const globals = {
+export const windowGlobals = {
   changeAvgN,
   changeColor,
   changeMoN,
