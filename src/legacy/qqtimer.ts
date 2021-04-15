@@ -20,8 +20,8 @@ import {
   parseColor,
   setOptionsCallbacks,
   toggleInput,
-} from "./options";
-import { rescramble, rescramble2 } from "./rescramble";
+} from "../controller-ish/options";
+import { rescramble, rescramble2 } from "../controller-ish/rescramble";
 import { getSession, saveSession } from "../model/session";
 import {
   changeNotes,
@@ -32,7 +32,11 @@ import {
   pretty,
   setStatsCallbacks,
 } from "./stats";
-import { setTimingCallbacks, startTimer, stopTimer } from "./timing";
+import {
+  setTimingCallbacks,
+  startTimer,
+  stopTimer,
+} from "../controller-ish/timing";
 
 // #################### TIMER STUFF ####################
 

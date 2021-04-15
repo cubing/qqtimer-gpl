@@ -1,7 +1,7 @@
-import { optionsWindowGlobals } from "./legacy/options";
+import { optionsWindowGlobals } from "./controller-ish/options";
 import { qqtimerWindowGlobals, initialize } from "./legacy/qqtimer";
 import { statsWindowGlobals } from "./legacy/stats";
-import { stopTimer } from "./legacy/timing";
+import { stopTimer } from "./controller-ish/timing";
 import { toggleImport } from "./dom";
 
 for (const [name, fn] of Object.entries(qqtimerWindowGlobals)) {

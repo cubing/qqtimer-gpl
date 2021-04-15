@@ -1,8 +1,8 @@
 import { $ } from "../dom";
 import { setCookie } from "../model/cookies";
-import { getBrowser } from "./compat";
+import { getBrowser } from "../legacy/compat";
 import { globals } from "../model/globals";
-import { getStats } from "./stats";
+import { getStats } from "../legacy/stats";
 import { stopTimer } from "./timing";
 
 let loadList;
