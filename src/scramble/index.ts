@@ -1,4 +1,7 @@
 import { $ } from "../dom";
+import { megascramble } from "./megascramble";
+import { rndEl } from "./random";
+import { scramblerGlobals } from "./scramblerGlobals";
 import {
   getpyraoptscramble,
   getskewboptscramble,
@@ -10,45 +13,32 @@ export { scrdata } from "./scrdata";
 
 // #################### SCRAMBLING ####################
 
-var seq = [];
-var p = [];
-var ss = [];
-var type = "333";
-var len = 0;
-var num = 1;
-var cubesuff = ["", "2", "'"];
-var minxsuff = ["", "2", "'", "2'"];
-var initoncesq1 = 1;
-
-var scramble: string;
-var lastscramble: string;
-
 export function setScrambleType(newType: string): void {
-  type = newType;
+  scramblerGlobals.type = newType;
 }
 
 export function getScrambleType(): string {
-  return type;
+  return scramblerGlobals.type;
 }
 
 export function getLen(): number {
-  return len;
+  return scramblerGlobals.len;
 }
 
 export function setLen(newLen: number): void {
-  len = newLen;
+  scramblerGlobals.len = newLen;
 }
 
 export function getScramble(): string {
-  return scramble;
+  return scramblerGlobals.scramble;
 }
 
 export function clearScramble(): void {
-  scramble = "";
+  scramblerGlobals.scramble = "";
 }
 
 export function getLastScramble(): string {
-  return lastscramble;
+  return scramblerGlobals.lastscramble;
 }
 
 export function initializeScramblers(): void {
@@ -56,32 +46,30 @@ export function initializeScramblers(): void {
   scramblers["slidy"] = ["", null];
 }
 
-// Takes a random element of the array x.
-function rndEl(x) {
-  return x[Math.floor(Math.random() * x.length)];
-}
-
 export function scrambleIt() {
   $<HTMLSelectElement>("optbox").blur();
   $<HTMLSelectElement>("optbox2").blur();
-  lastscramble = scramble;
-  for (var i = 0; i < num; i++) ss[i] = "";
-  if (type == "111") {
+  scramblerGlobals.lastscramble = scramblerGlobals.scramble;
+  for (var i = 0; i < scramblerGlobals.num; i++) scramblerGlobals.ss[i] = "";
+  if (scramblerGlobals.type == "111") {
     // 1x1x1
-    megascramble([["x"], ["y"], ["z"]], cubesuff);
-  } else if (type == "2223") {
+    megascramble([["x"], ["y"], ["z"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "2223") {
     // 2x2x2 (3-gen)
-    megascramble([["U"], ["R"], ["F"]], cubesuff);
-  } else if (type == "2226") {
+    megascramble([["U"], ["R"], ["F"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "2226") {
     // 2x2x2 (6-gen)
-    megascramble([[["U", "D"]], [["R", "L"]], [["F", "B"]]], cubesuff);
-  } else if (type == "222o") {
+    megascramble(
+      [[["U", "D"]], [["R", "L"]], [["F", "B"]]],
+      scramblerGlobals.cubesuff
+    );
+  } else if (scramblerGlobals.type == "222o") {
     // 2x2x2 (optimal random state)
     get2x2optscramble(0);
-  } else if (type == "222so") {
+  } else if (scramblerGlobals.type == "222so") {
     // 2x2x2 (random state)
     get2x2optscramble(9);
-  } else if (type == "333o") {
+  } else if (scramblerGlobals.type == "333o") {
     // 3x3x3 (old style)
     megascramble(
       [
@@ -89,23 +77,25 @@ export function scrambleIt() {
         ["R", "L"],
         ["F", "B"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "333") {
+  } else if (scramblerGlobals.type == "333") {
     // 3x3x3 (random state)
-    ss[0] = scramblers["333"].getRandomScramble();
-  } else if (type == "333ori") {
+    scramblerGlobals.ss[0] = scramblers["333"].getRandomScramble();
+  } else if (scramblerGlobals.type == "333ori") {
     // 3x3x3 (random state + orientation)
-    ss[0] = scramblers["333"].getRandomScramble();
-    ss[0] += randomCubeOrientation();
-  } else if (type == "sqrs") {
+    scramblerGlobals.ss[0] = scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += randomCubeOrientation();
+  } else if (scramblerGlobals.type == "sqrs") {
     // square-1 (random state)
-    if (initoncesq1 == 1) {
+    if (scramblerGlobals.initoncesq1 == 1) {
       scramblers["sq1"].initialize(null, Math);
-      initoncesq1 = 0;
+      scramblerGlobals.initoncesq1 = 0;
     }
-    ss[0] = scramblers["sq1"].getRandomScramble().scramble_string;
-  } else if (type == "334") {
+    scramblerGlobals.ss[0] = scramblers[
+      "sq1"
+    ].getRandomScramble().scramble_string;
+  } else if (scramblerGlobals.type == "334") {
     // 3x3x4
     megascramble(
       [
@@ -133,7 +123,7 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "335") {
+  } else if (scramblerGlobals.type == "335") {
     // 3x3x5
     var n: number;
     megascramble(
@@ -147,11 +137,11 @@ export function scrambleIt() {
       ],
       [""]
     );
-    for (n = 0; n < num; n++) {
-      ss[n] += " / ";
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " / ";
     }
-    ss[0] += scramblers["333"].getRandomScramble();
-  } else if (type == "336") {
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+  } else if (scramblerGlobals.type == "336") {
     // 3x3x6
     megascramble(
       [
@@ -227,7 +217,7 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "337") {
+  } else if (scramblerGlobals.type == "337") {
     // 3x3x7
     var n: number;
     megascramble(
@@ -273,11 +263,11 @@ export function scrambleIt() {
       ],
       [""]
     );
-    for (n = 0; n < num; n++) {
-      ss[n] += " / ";
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " / ";
     }
-    ss[0] += scramblers["333"].getRandomScramble();
-  } else if (type == "446") {
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+  } else if (scramblerGlobals.type == "446") {
     // 4x4x6
     var n: number;
     megascramble(
@@ -291,8 +281,8 @@ export function scrambleIt() {
       ],
       [""]
     );
-    for (n = 0; n < num; n++) {
-      ss[n] += " / ";
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " / ";
     }
     megascramble(
       [
@@ -300,9 +290,9 @@ export function scrambleIt() {
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "888") {
+  } else if (scramblerGlobals.type == "888") {
     // 8x8x8 (SiGN)
     megascramble(
       [
@@ -310,9 +300,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r", "3l", "4r"],
         ["F", "B", "f", "b", "3f", "3b", "4f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "999") {
+  } else if (scramblerGlobals.type == "999") {
     // 9x9x9 (SiGN)
     megascramble(
       [
@@ -320,9 +310,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r", "3l", "4r", "4l"],
         ["F", "B", "f", "b", "3f", "3b", "4f", "4b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "101010") {
+  } else if (scramblerGlobals.type == "101010") {
     // 10x10x10 (SiGN)
     megascramble(
       [
@@ -330,9 +320,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r", "3l", "4r", "4l", "5r"],
         ["F", "B", "f", "b", "3f", "3b", "4f", "4b", "5f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "111111") {
+  } else if (scramblerGlobals.type == "111111") {
     // 11x11x11 (SiGN)
     megascramble(
       [
@@ -340,9 +330,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r", "3l", "4r", "4l", "5r", "5l"],
         ["F", "B", "f", "b", "3f", "3b", "4f", "4b", "5f", "5b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "444") {
+  } else if (scramblerGlobals.type == "444") {
     // 4x4x4 (SiGN)
     megascramble(
       [
@@ -350,9 +340,9 @@ export function scrambleIt() {
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "444wca") {
+  } else if (scramblerGlobals.type == "444wca") {
     // 4x4x4 (WCA)
     megascramble(
       [
@@ -360,12 +350,12 @@ export function scrambleIt() {
         ["R", "L", "Rw"],
         ["F", "B", "Fw"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "444yj") {
+  } else if (scramblerGlobals.type == "444yj") {
     // 4x4x4 (YJ style)
     yj4x4();
-  } else if (type == "555") {
+  } else if (scramblerGlobals.type == "555") {
     // 5x5x5 (SiGN)
     megascramble(
       [
@@ -373,9 +363,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "555wca") {
+  } else if (scramblerGlobals.type == "555wca") {
     // 5x5x5 (WCA)
     megascramble(
       [
@@ -383,9 +373,9 @@ export function scrambleIt() {
         ["R", "L", "Rw", "Lw"],
         ["F", "B", "Fw", "Bw"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "666p") {
+  } else if (scramblerGlobals.type == "666p") {
     // 6x6x6 (prefix)
     megascramble(
       [
@@ -393,9 +383,9 @@ export function scrambleIt() {
         ["R", "L", "2R", "2L", "3R"],
         ["F", "B", "2F", "2B", "3F"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "666s") {
+  } else if (scramblerGlobals.type == "666s") {
     // 6x6x6 (suffix)
     megascramble(
       [
@@ -403,9 +393,9 @@ export function scrambleIt() {
         ["R", "L", "R&sup2;", "L&sup2;", "R&sup3;"],
         ["F", "B", "F&sup2;", "B&sup2;", "F&sup3;"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "666si") {
+  } else if (scramblerGlobals.type == "666si") {
     // 6x6x6 (SiGN)
     megascramble(
       [
@@ -413,9 +403,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r"],
         ["F", "B", "f", "b", "3f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "666wca") {
+  } else if (scramblerGlobals.type == "666wca") {
     // 6x6x6 (WCA)
     megascramble(
       [
@@ -423,9 +413,9 @@ export function scrambleIt() {
         ["R", "L", "Rw", "Lw", "3Rw"],
         ["F", "B", "Fw", "Bw", "3Fw"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "777p") {
+  } else if (scramblerGlobals.type == "777p") {
     // 7x7x7 (prefix)
     megascramble(
       [
@@ -433,9 +423,9 @@ export function scrambleIt() {
         ["R", "L", "2R", "2L", "3R", "3L"],
         ["F", "B", "2F", "2B", "3F", "3B"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "777s") {
+  } else if (scramblerGlobals.type == "777s") {
     // 7x7x7 (suffix)
     megascramble(
       [
@@ -443,9 +433,9 @@ export function scrambleIt() {
         ["R", "L", "R&sup2;", "L&sup2;", "R&sup3;", "L&sup3;"],
         ["F", "B", "F&sup2;", "B&sup2;", "F&sup3;", "B&sup3;"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "777si") {
+  } else if (scramblerGlobals.type == "777si") {
     // 7x7x7 (SiGN)
     megascramble(
       [
@@ -453,9 +443,9 @@ export function scrambleIt() {
         ["R", "L", "r", "l", "3r", "3l"],
         ["F", "B", "f", "b", "3f", "3b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "777wca") {
+  } else if (scramblerGlobals.type == "777wca") {
     // 7x7x7 (WCA)
     megascramble(
       [
@@ -463,34 +453,34 @@ export function scrambleIt() {
         ["R", "L", "Rw", "Lw", "3Rw", "3Lw"],
         ["F", "B", "Fw", "Bw", "3Fw", "3Bw"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "8puzso") {
+  } else if (scramblerGlobals.type == "8puzso") {
     // 8 puzzle random state
-    if (scramblers["slidy"][0] != type) {
+    if (scramblers["slidy"][0] != scramblerGlobals.type) {
       scramblers["slidy"] = [
-        type,
+        scramblerGlobals.type,
         new SlidySolver(3, 3, [
           [1, 2, 3],
           [4, 5, 6, 7, 8],
         ]),
       ];
     }
-    ss[0] = scramblers["slidy"][1].getscramble();
-  } else if (type == "8puzo") {
+    scramblerGlobals.ss[0] = scramblers["slidy"][1].getscramble();
+  } else if (scramblerGlobals.type == "8puzo") {
     // 8 puzzle optimal random state
-    if (scramblers["slidy"][0] != type) {
+    if (scramblers["slidy"][0] != scramblerGlobals.type) {
       scramblers["slidy"] = [
-        type,
+        scramblerGlobals.type,
         new SlidySolver(3, 3, [[1, 2, 3, 4, 5, 6, 7, 8]]),
       ];
     }
-    ss[0] = scramblers["slidy"][1].getscramble();
-  } else if (type == "15puzso") {
+    scramblerGlobals.ss[0] = scramblers["slidy"][1].getscramble();
+  } else if (scramblerGlobals.type == "15puzso") {
     // 15 puzzle random state (fast)
-    if (scramblers["slidy"][0] != type) {
+    if (scramblers["slidy"][0] != scramblerGlobals.type) {
       scramblers["slidy"] = [
-        type,
+        scramblerGlobals.type,
         new SlidySolver(4, 4, [
           [1, 2],
           [3, 4],
@@ -500,12 +490,12 @@ export function scrambleIt() {
         ]),
       ];
     }
-    ss[0] = scramblers["slidy"][1].getscramble();
-  } else if (type == "15puzsoe") {
+    scramblerGlobals.ss[0] = scramblers["slidy"][1].getscramble();
+  } else if (scramblerGlobals.type == "15puzsoe") {
     // 15 puzzle random state (efficient)
-    if (scramblers["slidy"][0] != type) {
+    if (scramblers["slidy"][0] != scramblerGlobals.type) {
       scramblers["slidy"] = [
-        type,
+        scramblerGlobals.type,
         new SlidySolver(4, 4, [
           [1, 2, 3, 4],
           [5, 9, 13],
@@ -513,12 +503,12 @@ export function scrambleIt() {
         ]),
       ];
     }
-    ss[0] = scramblers["slidy"][1].getscramble();
-  } else if (type == "24puzso") {
+    scramblerGlobals.ss[0] = scramblers["slidy"][1].getscramble();
+  } else if (scramblerGlobals.type == "24puzso") {
     // 24 puzzle random state (fast)
-    if (scramblers["slidy"][0] != type) {
+    if (scramblers["slidy"][0] != scramblerGlobals.type) {
       scramblers["slidy"] = [
-        type,
+        scramblerGlobals.type,
         new SlidySolver(5, 5, [
           [1, 2],
           [6, 7],
@@ -531,14 +521,14 @@ export function scrambleIt() {
         ]),
       ];
     }
-    ss[0] = scramblers["slidy"][1].getscramble();
-  } else if (type == "15p") {
+    scramblerGlobals.ss[0] = scramblers["slidy"][1].getscramble();
+  } else if (scramblerGlobals.type == "15p") {
     // 15 puzzle random moves
     do15puzzle(false);
-  } else if (type == "clk") {
+  } else if (scramblerGlobals.type == "clk") {
     // Clock (Jaap order)
-    for (var n = 0; n < num; n++) {
-      ss[n] =
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] =
         "<tt><b><br>&nbsp;UU" +
         c("u") +
         "dU" +
@@ -554,7 +544,7 @@ export function scrambleIt() {
         "UU" +
         c("u") +
         "UU";
-      ss[n] +=
+      scramblerGlobals.ss[n] +=
         c("u") +
         "UU" +
         c("u") +
@@ -569,7 +559,7 @@ export function scrambleIt() {
         c("d") +
         "Ud" +
         c("d");
-      ss[n] +=
+      scramblerGlobals.ss[n] +=
         "UU" +
         c3() +
         "UU" +
@@ -585,25 +575,26 @@ export function scrambleIt() {
         c2() +
         "</b></tt><br>";
     }
-  } else if (type == "clkc") {
+  } else if (scramblerGlobals.type == "clkc") {
     // Clock (concise)
-    for (var n = 0; n < num; n++) {
-      ss[n] = "";
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] = "";
       for (var i = 0; i < 4; i++)
-        ss[n] +=
+        scramblerGlobals.ss[n] +=
           "(" +
           (Math.floor(Math.random() * 12) - 5) +
           ", " +
           (Math.floor(Math.random() * 12) - 5) +
           ") / ";
       for (var i = 0; i < 6; i++)
-        ss[n] += "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
-      for (var i = 0; i < 4; i++) ss[n] += rndEl(["d", "U"]);
+        scramblerGlobals.ss[n] +=
+          "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
+      for (var i = 0; i < 4; i++) scramblerGlobals.ss[n] += rndEl(["d", "U"]);
     }
-  } else if (type == "clke") {
+  } else if (scramblerGlobals.type == "clke") {
     // Clock (efficient order)
-    for (var n = 0; n < num; n++) {
-      ss[n] =
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] =
         "<tt><b><br>&nbsp;UU" +
         c("u") +
         "dU" +
@@ -619,7 +610,7 @@ export function scrambleIt() {
         "Ud" +
         c("u") +
         "Ud";
-      ss[n] +=
+      scramblerGlobals.ss[n] +=
         c("u") +
         "dd" +
         c("u") +
@@ -635,7 +626,7 @@ export function scrambleIt() {
         "dU" +
         c3() +
         "dd";
-      ss[n] +=
+      scramblerGlobals.ss[n] +=
         c("d") +
         "Ud" +
         c3() +
@@ -650,9 +641,9 @@ export function scrambleIt() {
         c2() +
         "</b></tt><br>";
     }
-  } else if (type == "clkwca") {
+  } else if (scramblerGlobals.type == "clkwca") {
     // Clock (WCA) - scrambler by DrKorbin
-    for (var n = 0; n < num; n++) {
+    for (var n = 0; n < scramblerGlobals.num; n++) {
       var clock_rotations = [
         "0+",
         "1+",
@@ -684,17 +675,17 @@ export function scrambleIt() {
         "ALL",
       ];
       var final_pins = ["UR", "DR", "DL", "UL"];
-      ss[n] = "";
+      scramblerGlobals.ss[n] = "";
       for (var i = 0; i < 14; i++) {
-        ss[n] += pins[i] + rndEl(clock_rotations) + "&nbsp;";
-        if (i == 8) ss[n] += "y2&nbsp;";
+        scramblerGlobals.ss[n] += pins[i] + rndEl(clock_rotations) + "&nbsp;";
+        if (i == 8) scramblerGlobals.ss[n] += "y2&nbsp;";
       }
       for (var i = 0; i < 4; i++) {
-        ss[n] += rndEl([final_pins[i] + "&nbsp;", ""]);
+        scramblerGlobals.ss[n] += rndEl([final_pins[i] + "&nbsp;", ""]);
       }
-      ss[n] += "";
+      scramblerGlobals.ss[n] += "";
     }
-  } else if (type == "cm3") {
+  } else if (scramblerGlobals.type == "cm3") {
     // Cmetrick
     megascramble(
       [
@@ -711,7 +702,7 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "cm2") {
+  } else if (scramblerGlobals.type == "cm2") {
     // Cmetrick Mini
     megascramble(
       [
@@ -726,13 +717,13 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "223") {
+  } else if (scramblerGlobals.type == "223") {
     // Domino/2x3x3
     megascramble(
       [[["U", "U'", "U2"]], [["R2", "L2", "R2 L2"]], [["F2", "B2", "F2 B2"]]],
       [""]
     );
-  } else if (type == "flp") {
+  } else if (scramblerGlobals.type == "flp") {
     // Floppy Cube
     megascramble(
       [
@@ -741,7 +732,7 @@ export function scrambleIt() {
       ],
       ["2"]
     );
-  } else if (type == "fto") {
+  } else if (scramblerGlobals.type == "fto") {
     // FTO/Face-Turning Octa
     megascramble(
       [
@@ -752,50 +743,53 @@ export function scrambleIt() {
       ],
       ["", "'"]
     );
-  } else if (type == "giga") {
+  } else if (scramblerGlobals.type == "giga") {
     // Gigaminx
     gigascramble();
-  } else if (type == "heli") {
+  } else if (scramblerGlobals.type == "heli") {
     // Helicopter Cube
     helicubescramble();
-  } else if (type == "mgmo") {
+  } else if (scramblerGlobals.type == "mgmo") {
     // Megaminx (old style)
     oldminxscramble();
-  } else if (type == "mgmp") {
+  } else if (scramblerGlobals.type == "mgmp") {
     // Megaminx (Pochmann)
-    pochscramble(10, Math.ceil(len / 10));
-  } else if (type == "mgmwca") {
+    pochscramble(10, Math.ceil(scramblerGlobals.len / 10));
+  } else if (scramblerGlobals.type == "mgmwca") {
     // Megaminx (WCA)
-    pochscramble(10, Math.ceil(len / 10), true);
-  } else if (type == "mgmc") {
+    pochscramble(10, Math.ceil(scramblerGlobals.len / 10), true);
+  } else if (scramblerGlobals.type == "mgmc") {
     // Megaminx (Carrot)
-    carrotminx(10, Math.ceil(len / 10));
-  } else if (type == "pyrm") {
+    carrotminx(10, Math.ceil(scramblerGlobals.len / 10));
+  } else if (scramblerGlobals.type == "pyrm") {
     // Pyraminx (random moves)
     megascramble([["U"], ["L"], ["R"], ["B"]], ["!", "'"]);
-    for (var n = 0; n < num; n++) {
+    for (var n = 0; n < scramblerGlobals.num; n++) {
       var cnt = 0;
       var rnd = [];
       for (var i = 0; i < 4; i++) {
         rnd[i] = Math.floor(Math.random() * 3);
         if (rnd[i] > 0) cnt++;
       }
-      ss[n] = ss[n].substr(0, ss[n].length - 3 * cnt);
-      ss[n] =
+      scramblerGlobals.ss[n] = scramblerGlobals.ss[n].substr(
+        0,
+        scramblerGlobals.ss[n].length - 3 * cnt
+      );
+      scramblerGlobals.ss[n] =
         ["", "b ", "b' "][rnd[0]] +
         ["", "l ", "l' "][rnd[1]] +
         ["", "u ", "u' "][rnd[2]] +
         ["", "r ", "r' "][rnd[3]] +
-        ss[n];
-      ss[n] = ss[n].replace(/!/g, "");
+        scramblerGlobals.ss[n];
+      scramblerGlobals.ss[n] = scramblerGlobals.ss[n].replace(/!/g, "");
     }
-  } else if (type == "pyro") {
+  } else if (scramblerGlobals.type == "pyro") {
     // Pyraminx (optimal random state)
-    ss[0] += getpyraoptscramble(0);
-  } else if (type == "pyrso") {
+    scramblerGlobals.ss[0] += getpyraoptscramble(0);
+  } else if (scramblerGlobals.type == "pyrso") {
     // Pyraminx (random state)
-    ss[0] += getpyraoptscramble(8);
-  } else if (type == "prco") {
+    scramblerGlobals.ss[0] += getpyraoptscramble(8);
+  } else if (scramblerGlobals.type == "prco") {
     // Pyraminx Crystal (old style)
     megascramble(
       [
@@ -806,261 +800,263 @@ export function scrambleIt() {
         ["BL", "DR"],
         ["BR", "DL"],
       ],
-      minxsuff
+      scramblerGlobals.minxsuff
     );
-  } else if (type == "prcp") {
+  } else if (scramblerGlobals.type == "prcp") {
     // Pyraminx Crystal (Pochmann)
-    pochscramble(10, Math.ceil(len / 10));
-  } else if (type == "r234") {
+    pochscramble(10, Math.ceil(scramblerGlobals.len / 10));
+  } else if (scramblerGlobals.type == "r234") {
     // 2x2x2 3x3x3 4x4x4 relay
-    ss[0] = "<br> 2) ";
+    scramblerGlobals.ss[0] = "<br> 2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "r2345") {
+  } else if (scramblerGlobals.type == "r2345") {
     // 2x2x2 3x3x3 4x4x4 5x5x5 relay
-    ss[0] = "<br> 2) ";
+    scramblerGlobals.ss[0] = "<br> 2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 5) ";
-    len = 60;
+    scramblerGlobals.ss[0] += "<br> 5) ";
+    scramblerGlobals.len = 60;
     megascramble(
       [
         ["U", "D", "u", "d"],
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "r23456") {
+  } else if (scramblerGlobals.type == "r23456") {
     // 2x2x2 3x3x3 4x4x4 5x5x5 relay
-    ss[0] = "<br> 2) ";
+    scramblerGlobals.ss[0] = "<br> 2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 5) ";
-    len = 60;
+    scramblerGlobals.ss[0] += "<br> 5) ";
+    scramblerGlobals.len = 60;
     megascramble(
       [
         ["U", "D", "u", "d"],
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 6) ";
-    len = 80;
+    scramblerGlobals.ss[0] += "<br> 6) ";
+    scramblerGlobals.len = 80;
     megascramble(
       [
         ["U", "D", "2U", "2D", "3U"],
         ["R", "L", "2R", "2L", "3R"],
         ["F", "B", "2F", "2B", "3F"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "r234567") {
+  } else if (scramblerGlobals.type == "r234567") {
     // 2x2x2 3x3x3 4x4x4 5x5x5 relay
-    ss[0] = "<br> 2) ";
+    scramblerGlobals.ss[0] = "<br> 2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 5) ";
-    len = 60;
+    scramblerGlobals.ss[0] += "<br> 5) ";
+    scramblerGlobals.len = 60;
     megascramble(
       [
         ["U", "D", "u", "d"],
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 6) ";
-    len = 80;
+    scramblerGlobals.ss[0] += "<br> 6) ";
+    scramblerGlobals.len = 80;
     megascramble(
       [
         ["U", "D", "2U", "2D", "3U"],
         ["R", "L", "2R", "2L", "3R"],
         ["F", "B", "2F", "2B", "3F"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 7) ";
-    len = 100;
+    scramblerGlobals.ss[0] += "<br> 7) ";
+    scramblerGlobals.len = 100;
     megascramble(
       [
         ["U", "D", "2U", "2D", "3U", "3D"],
         ["R", "L", "2R", "2L", "3R", "3L"],
         ["F", "B", "2F", "2B", "3F", "3B"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "guildford") {
+  } else if (scramblerGlobals.type == "guildford") {
     // Guildford Challenge
-    ss[0] += "<br> 2x2x2) ";
+    scramblerGlobals.ss[0] += "<br> 2x2x2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3x3x3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4x4x4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3x3x3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4x4x4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 5x5x5) ";
-    len = 60;
+    scramblerGlobals.ss[0] += "<br> 5x5x5) ";
+    scramblerGlobals.len = 60;
     megascramble(
       [
         ["U", "D", "u", "d"],
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 6x6x6) ";
-    len = 80;
+    scramblerGlobals.ss[0] += "<br> 6x6x6) ";
+    scramblerGlobals.len = 80;
     megascramble(
       [
         ["U", "D", "2U", "2D", "3U"],
         ["R", "L", "2R", "2L", "3R"],
         ["F", "B", "2F", "2B", "3F"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 7x7x7) ";
-    len = 100;
+    scramblerGlobals.ss[0] += "<br> 7x7x7) ";
+    scramblerGlobals.len = 100;
     megascramble(
       [
         ["U", "D", "2U", "2D", "3U", "3D"],
         ["R", "L", "2R", "2L", "3R", "3L"],
         ["F", "B", "2F", "2B", "3F", "3B"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 3OH) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 3FT) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> Pyra) ";
-    ss[0] += getpyraoptscramble(8);
-    ss[0] += "<br> Square-1) ";
+    scramblerGlobals.ss[0] += "<br> 3OH) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 3FT) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> Pyra) ";
+    scramblerGlobals.ss[0] += getpyraoptscramble(8);
+    scramblerGlobals.ss[0] += "<br> Square-1) ";
     sq1_scramble(1);
-    ss[0] += "<br> Skewb) ";
-    ss[0] += getskewboptscramble(8);
-    ss[0] += "<br> Clock) ";
+    scramblerGlobals.ss[0] += "<br> Skewb) ";
+    scramblerGlobals.ss[0] += getskewboptscramble(8);
+    scramblerGlobals.ss[0] += "<br> Clock) ";
     for (var i = 0; i < 4; i++)
-      ss[0] +=
+      scramblerGlobals.ss[0] +=
         "(" +
         (Math.floor(Math.random() * 12) - 5) +
         ", " +
         (Math.floor(Math.random() * 12) - 5) +
         ") / ";
     for (var i = 0; i < 6; i++)
-      ss[0] += "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
-    for (var i = 0; i < 4; i++) ss[0] += rndEl(["d", "U"]);
-    ss[0] += "<br> Mega) ";
-    pochscramble(10, Math.ceil(len / 10));
-  } else if (type == "miniguild") {
+      scramblerGlobals.ss[0] +=
+        "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
+    for (var i = 0; i < 4; i++) scramblerGlobals.ss[0] += rndEl(["d", "U"]);
+    scramblerGlobals.ss[0] += "<br> Mega) ";
+    pochscramble(10, Math.ceil(scramblerGlobals.len / 10));
+  } else if (scramblerGlobals.type == "miniguild") {
     // Mini Guildford Challenge
-    ss[0] += "<br> 2x2x2) ";
+    scramblerGlobals.ss[0] += "<br> 2x2x2) ";
     get2x2optscramble(9);
-    ss[0] += "<br> 3x3x3) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> 4x4x4) ";
-    len = 40;
+    scramblerGlobals.ss[0] += "<br> 3x3x3) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> 4x4x4) ";
+    scramblerGlobals.len = 40;
     megascramble(
       [
         ["U", "D", "u"],
         ["R", "L", "r"],
         ["F", "B", "f"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 5x5x5) ";
-    len = 60;
+    scramblerGlobals.ss[0] += "<br> 5x5x5) ";
+    scramblerGlobals.len = 60;
     megascramble(
       [
         ["U", "D", "u", "d"],
         ["R", "L", "r", "l"],
         ["F", "B", "f", "b"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    ss[0] += "<br> 3OH) ";
-    ss[0] += scramblers["333"].getRandomScramble();
-    ss[0] += "<br> Pyra) ";
-    ss[0] += getpyraoptscramble(8);
-    ss[0] += "<br> Square-1) ";
+    scramblerGlobals.ss[0] += "<br> 3OH) ";
+    scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
+    scramblerGlobals.ss[0] += "<br> Pyra) ";
+    scramblerGlobals.ss[0] += getpyraoptscramble(8);
+    scramblerGlobals.ss[0] += "<br> Square-1) ";
     sq1_scramble(1);
-    ss[0] += "<br> Skewb) ";
-    ss[0] += getskewboptscramble(8);
-    ss[0] += "<br> Clock) ";
+    scramblerGlobals.ss[0] += "<br> Skewb) ";
+    scramblerGlobals.ss[0] += getskewboptscramble(8);
+    scramblerGlobals.ss[0] += "<br> Clock) ";
     for (var i = 0; i < 4; i++)
-      ss[0] +=
+      scramblerGlobals.ss[0] +=
         "(" +
         (Math.floor(Math.random() * 12) - 5) +
         ", " +
         (Math.floor(Math.random() * 12) - 5) +
         ") / ";
     for (var i = 0; i < 6; i++)
-      ss[0] += "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
-    for (var i = 0; i < 4; i++) ss[0] += rndEl(["d", "U"]);
-    ss[0] += "<br> Mega) ";
-    pochscramble(10, Math.ceil(len / 10));
-  } else if (type == "r3") {
+      scramblerGlobals.ss[0] +=
+        "(" + (Math.floor(Math.random() * 12) - 5) + ") / ";
+    for (var i = 0; i < 4; i++) scramblerGlobals.ss[0] += rndEl(["d", "U"]);
+    scramblerGlobals.ss[0] += "<br> Mega) ";
+    pochscramble(10, Math.ceil(scramblerGlobals.len / 10));
+  } else if (scramblerGlobals.type == "r3") {
     // multiple 3x3x3 relay
-    var ncubes = len;
-    len = 25;
+    var ncubes = scramblerGlobals.len;
+    scramblerGlobals.len = 25;
     for (var i = 0; i < ncubes; i++) {
-      ss[0] += "<br>" + (i + 1) + ") ";
-      ss[0] += scramblers["333"].getRandomScramble();
+      scramblerGlobals.ss[0] += "<br>" + (i + 1) + ") ";
+      scramblerGlobals.ss[0] += scramblers["333"].getRandomScramble();
     }
-    len = ncubes;
-  } else if (type == "sia113") {
+    scramblerGlobals.len = ncubes;
+  } else if (scramblerGlobals.type == "sia113") {
     // Siamese Cube (1x1x3 block)
     var n: number,
       s = [];
@@ -1069,111 +1065,111 @@ export function scrambleIt() {
         ["U", "u"],
         ["R", "r"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-    for (n = 0; n < num; n++) {
-      ss[n] += " z2 ";
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " z2 ";
     }
     megascramble(
       [
         ["U", "u"],
         ["R", "r"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "sia123") {
+  } else if (scramblerGlobals.type == "sia123") {
     // Siamese Cube (1x2x3 block)
     var n: number,
       s = [];
-    megascramble([["U"], ["R", "r"]], cubesuff);
-    for (n = 0; n < num; n++) {
-      ss[n] += " z2 ";
+    megascramble([["U"], ["R", "r"]], scramblerGlobals.cubesuff);
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " z2 ";
     }
-    megascramble([["U"], ["R", "r"]], cubesuff);
-  } else if (type == "sia222") {
+    megascramble([["U"], ["R", "r"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "sia222") {
     // Siamese Cube (2x2x2 block)
     var n: number,
       s = [];
-    megascramble([["U"], ["R"], ["F"]], cubesuff);
-    for (n = 0; n < num; n++) {
-      ss[n] += " z2 y ";
+    megascramble([["U"], ["R"], ["F"]], scramblerGlobals.cubesuff);
+    for (n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] += " z2 y ";
     }
-    megascramble([["U"], ["R"], ["F"]], cubesuff);
-  } else if (type == "skb") {
+    megascramble([["U"], ["R"], ["F"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "skb") {
     // Skewb
     megascramble([["R"], ["L"], ["B"], ["U"]], ["", "'"]);
-  } else if (type == "skbo") {
+  } else if (scramblerGlobals.type == "skbo") {
     // Skewb (optimal random state)
-    ss[0] += getskewboptscramble(0);
-  } else if (type == "skbso") {
+    scramblerGlobals.ss[0] += getskewboptscramble(0);
+  } else if (scramblerGlobals.type == "skbso") {
     // Skewb (suboptimal random state)
-    ss[0] += getskewboptscramble(8);
-  } else if (type == "sq1h") {
+    scramblerGlobals.ss[0] += getskewboptscramble(8);
+  } else if (scramblerGlobals.type == "sq1h") {
     // Square-1 (turn metric)
     sq1_scramble(1);
-  } else if (type == "sq1t") {
+  } else if (scramblerGlobals.type == "sq1t") {
     // Square-1 (twist metric)
     sq1_scramble(0);
-  } else if (type == "sq2") {
+  } else if (scramblerGlobals.type == "sq2") {
     // Square-2
     var i: number;
-    for (var n = 0; n < num; n++) {
+    for (var n = 0; n < scramblerGlobals.num; n++) {
       i = 0;
-      while (i < len) {
+      while (i < scramblerGlobals.len) {
         var rndu = Math.floor(Math.random() * 12) - 5;
         var rndd = Math.floor(Math.random() * 12) - 5;
         if (rndu != 0 || rndd != 0) {
           i++;
-          ss[n] += "(" + rndu + "," + rndd + ") / ";
+          scramblerGlobals.ss[n] += "(" + rndu + "," + rndd + ") / ";
         }
       }
     }
-  } else if (type == "sfl") {
+  } else if (scramblerGlobals.type == "sfl") {
     // Super Floppy Cube
     megascramble(
       [
         ["R", "L"],
         ["U", "D"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "ssq1t") {
+  } else if (scramblerGlobals.type == "ssq1t") {
     // Super Square-1 (twist metric)
     ssq1t_scramble();
-  } else if (type == "ufo") {
+  } else if (scramblerGlobals.type == "ufo") {
     // UFO
     megascramble([["A"], ["B"], ["C"], [["U", "U'", "U2'", "U2", "U3"]]], [""]);
-  } else if (type == "2gen") {
+  } else if (scramblerGlobals.type == "2gen") {
     // 2-generator <R,U>
-    megascramble([["U"], ["R"]], cubesuff);
-  } else if (type == "2genl") {
+    megascramble([["U"], ["R"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "2genl") {
     // 2-generator <L,U>
-    megascramble([["U"], ["L"]], cubesuff);
-  } else if (type == "roux") {
+    megascramble([["U"], ["L"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "roux") {
     // Roux-generator <M,U>
-    megascramble([["U"], ["M"]], cubesuff);
-  } else if (type == "3gen_F") {
+    megascramble([["U"], ["M"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "3gen_F") {
     // 3-generator <F,R,U>
-    megascramble([["U"], ["R"], ["F"]], cubesuff);
-  } else if (type == "3gen_L") {
+    megascramble([["U"], ["R"], ["F"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "3gen_L") {
     // 3-generator <R,U,L>
-    megascramble([["U"], ["R", "L"]], cubesuff);
-  } else if (type == "RrU") {
+    megascramble([["U"], ["R", "L"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "RrU") {
     // 3-generator <R,r,U>
-    megascramble([["U"], ["R", "r"]], cubesuff);
-  } else if (type == "RrUu") {
+    megascramble([["U"], ["R", "r"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "RrUu") {
     // <R,r,U,u>
     megascramble(
       [
         ["U", "u"],
         ["R", "r"],
       ],
-      cubesuff
+      scramblerGlobals.cubesuff
     );
-  } else if (type == "minx2g") {
+  } else if (scramblerGlobals.type == "minx2g") {
     // megaminx 2-gen
-    megascramble([["U"], ["R"]], minxsuff);
-  } else if (type == "mlsll") {
+    megascramble([["U"], ["R"]], scramblerGlobals.minxsuff);
+  } else if (scramblerGlobals.type == "mlsll") {
     // megaminx LSLL
     megascramble(
       [
@@ -1183,13 +1179,13 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "bic") {
+  } else if (scramblerGlobals.type == "bic") {
     // Bandaged Cube
     bicube();
-  } else if (type == "bsq") {
+  } else if (scramblerGlobals.type == "bsq") {
     // Bandaged Square-1 </,(1,0)>
     sq1_scramble(2);
-  } else if (type == "half") {
+  } else if (scramblerGlobals.type == "half") {
     // 3x3x3 half turns
     megascramble(
       [
@@ -1199,38 +1195,38 @@ export function scrambleIt() {
       ],
       ["2"]
     );
-  } else if (type == "edges") {
+  } else if (scramblerGlobals.type == "edges") {
     // 3x3x3 edges only
-    ss[0] = scramblers["333"].getEdgeScramble();
-  } else if (type == "corners") {
+    scramblerGlobals.ss[0] = scramblers["333"].getEdgeScramble();
+  } else if (scramblerGlobals.type == "corners") {
     // 3x3x3 corners only
-    ss[0] = scramblers["333"].getCornerScramble();
-  } else if (type == "ll") {
+    scramblerGlobals.ss[0] = scramblers["333"].getCornerScramble();
+  } else if (scramblerGlobals.type == "ll") {
     // 3x3x3 last layer
-    ss[0] = scramblers["333"].getLLScramble();
-  } else if (type == "cmll") {
+    scramblerGlobals.ss[0] = scramblers["333"].getLLScramble();
+  } else if (scramblerGlobals.type == "cmll") {
     // 3x3x3 cmll
-    ss[0] =
+    scramblerGlobals.ss[0] =
       rndEl(["", "M ", "M2 ", "M' "]) + scramblers["333"].getCMLLScramble();
-  } else if (type == "zbll") {
+  } else if (scramblerGlobals.type == "zbll") {
     // 3x3x3 zbll
-    ss[0] = scramblers["333"].getZBLLScramble();
-  } else if (type == "2gll") {
+    scramblerGlobals.ss[0] = scramblers["333"].getZBLLScramble();
+  } else if (scramblerGlobals.type == "2gll") {
     // 3x3x3 2gll
-    ss[0] = scramblers["333"].get2GLLScramble();
-  } else if (type == "pll") {
+    scramblerGlobals.ss[0] = scramblers["333"].get2GLLScramble();
+  } else if (scramblerGlobals.type == "pll") {
     // 3x3x3 pll
-    ss[0] = scramblers["333"].getPLLScramble();
-  } else if (type == "lsll2") {
+    scramblerGlobals.ss[0] = scramblers["333"].getPLLScramble();
+  } else if (scramblerGlobals.type == "lsll2") {
     // 3x3x3 last slot + last layer
-    ss[0] = scramblers["333"].getLSLLScramble();
-  } else if (type == "zzls") {
+    scramblerGlobals.ss[0] = scramblers["333"].getLSLLScramble();
+  } else if (scramblerGlobals.type == "zzls") {
     // 3x3x3 ZZ last slot + last layer
-    ss[0] = scramblers["333"].getZZLSScramble();
-  } else if (type == "f2l") {
+    scramblerGlobals.ss[0] = scramblers["333"].getZZLSScramble();
+  } else if (scramblerGlobals.type == "f2l") {
     // 3x3x3 f2l
-    ss[0] = scramblers["333"].getF2LScramble();
-  } else if (type == "lsll") {
+    scramblerGlobals.ss[0] = scramblers["333"].getF2LScramble();
+  } else if (scramblerGlobals.type == "lsll") {
     // 3x3x3 last slot + last layer (old)
     megascramble(
       [
@@ -1240,17 +1236,17 @@ export function scrambleIt() {
       ],
       [""]
     );
-  } else if (type == "4edge") {
+  } else if (scramblerGlobals.type == "4edge") {
     // 4x4x4 edges
     edgescramble("r b2", ["b2 r'", "b2 U2 r U2 r U2 r U2 r"], ["u"]);
-  } else if (type == "5edge") {
+  } else if (scramblerGlobals.type == "5edge") {
     // 5x5x5 edges
     edgescramble(
       "r R b B",
       ["B' b' R' r'", "B' b' R' U2 r U2 r U2 r U2 r"],
       ["u", "d"]
     );
-  } else if (type == "6edge") {
+  } else if (scramblerGlobals.type == "6edge") {
     // 6x6x6 edges
     edgescramble(
       "3r r 3b b",
@@ -1262,7 +1258,7 @@ export function scrambleIt() {
       ],
       ["u", "3u", "d"]
     );
-  } else if (type == "7edge") {
+  } else if (scramblerGlobals.type == "7edge") {
     // 7x7x7 edges
     edgescramble(
       "3r r 3b b",
@@ -1274,18 +1270,20 @@ export function scrambleIt() {
       ],
       ["u", "3u", "3d", "d"]
     );
-  } else if (type == "-1") {
+  } else if (scramblerGlobals.type == "-1") {
     // -1x-1x-1 (micro style)
-    for (var n = 0; n < num; n++) {
-      for (var i = 0; i < len; i++) {
-        ss[n] += String.fromCharCode(32 + Math.floor(Math.random() * 224));
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      for (var i = 0; i < scramblerGlobals.len; i++) {
+        scramblerGlobals.ss[n] += String.fromCharCode(
+          32 + Math.floor(Math.random() * 224)
+        );
       }
-      ss[n] += "Error: subscript out of range";
+      scramblerGlobals.ss[n] += "Error: subscript out of range";
     }
-  } else if (type == "112") {
+  } else if (scramblerGlobals.type == "112") {
     // 1x1x2
-    megascramble([["R"], ["R"]], cubesuff);
-  } else if (type == "2222") {
+    megascramble([["R"], ["R"]], scramblerGlobals.cubesuff);
+  } else if (scramblerGlobals.type == "2222") {
     // 2x2x2x2
     scramble2222(
       [
@@ -1296,7 +1294,7 @@ export function scrambleIt() {
       ["", "y", "y'", "z", "z'", "z2"],
       ["", "x", "x'", "x2"]
     );
-  } else if (type == "333noob") {
+  } else if (scramblerGlobals.type == "333noob") {
     // 3x3x3 for noobs
     megascramble(
       [
@@ -1310,17 +1308,19 @@ export function scrambleIt() {
         " by 180 degrees,",
       ]
     );
-    for (var n = 0; n < num; n++) {
-      ss[n] = ss[n].replace(/t/, "T");
-      ss[n] = ss[n].substr(0, ss[n].length - 2) + ".";
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] = scramblerGlobals.ss[n].replace(/t/, "T");
+      scramblerGlobals.ss[n] =
+        scramblerGlobals.ss[n].substr(0, scramblerGlobals.ss[n].length - 2) +
+        ".";
     }
-  } else if (type == "lol") {
+  } else if (scramblerGlobals.type == "lol") {
     // LOL
     megascramble([["L"], ["O"]], [""]);
-    for (var n = 0; n < num; n++) {
-      ss[n] = ss[n].replace(/ /g, "");
+    for (var n = 0; n < scramblerGlobals.num; n++) {
+      scramblerGlobals.ss[n] = scramblerGlobals.ss[n].replace(/ /g, "");
     }
-  } else if (type == "eide") {
+  } else if (scramblerGlobals.type == "eide") {
     // Derrick Eide
     megascramble(
       [
@@ -1346,8 +1346,8 @@ export function scrambleIt() {
       ["", "", "", "!!!"]
     );
   }
-  scramble = ss[0];
-  $("scramble").innerHTML = "scramble: " + scramble + "&nbsp;";
+  scramblerGlobals.scramble = scramblerGlobals.ss[0];
+  $("scramble").innerHTML = "scramble: " + scramblerGlobals.scramble + "&nbsp;";
 }
 
 // Clock functions.
@@ -1396,13 +1396,13 @@ function edgescramble(start, end, moves) {
     ["B'", "B"],
   ];
   var ud = ["U", "D"];
-  ss[0] = start;
+  scramblerGlobals.ss[0] = start;
   // initialize move misalignments
   for (var i = 0; i < moves.length; i++) {
     movemis[i] = 0;
   }
 
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i < scramblerGlobals.len; i++) {
     // apply random moves
     var done = false;
     while (!done) {
@@ -1412,22 +1412,22 @@ function edgescramble(start, end, moves) {
         movemis[j] += x;
         if (x != 0) {
           done = true;
-          v += " " + moves[j] + cubesuff[x - 1];
+          v += " " + moves[j] + scramblerGlobals.cubesuff[x - 1];
         }
       }
     }
-    ss[0] += v;
+    scramblerGlobals.ss[0] += v;
 
     // apply random trigger, update U/D
     var trigger = Math.floor(Math.random() * 8);
     var layer = Math.floor(Math.random() * 2);
     var turn = Math.floor(Math.random() * 3);
-    ss[0] +=
+    scramblerGlobals.ss[0] +=
       " " +
       triggers[trigger][0] +
       " " +
       ud[layer] +
-      cubesuff[turn] +
+      scramblerGlobals.cubesuff[turn] +
       " " +
       triggers[trigger][1];
     if (layer == 0) {
@@ -1442,18 +1442,19 @@ function edgescramble(start, end, moves) {
   for (var i = 0; i < moves.length; i++) {
     var x = 4 - (movemis[i] % 4);
     if (x < 4) {
-      ss[0] += " " + moves[i] + cubesuff[x - 1];
+      scramblerGlobals.ss[0] +=
+        " " + moves[i] + scramblerGlobals.cubesuff[x - 1];
     }
   }
   u = 4 - (u % 4);
   d = 4 - (d % 4);
   if (u < 4) {
-    ss[0] += " U" + cubesuff[u - 1];
+    scramblerGlobals.ss[0] += " U" + scramblerGlobals.cubesuff[u - 1];
   }
   if (d < 4) {
-    ss[0] += " D" + cubesuff[d - 1];
+    scramblerGlobals.ss[0] += " D" + scramblerGlobals.cubesuff[d - 1];
   }
-  ss[0] += " " + rndEl(end);
+  scramblerGlobals.ss[0] += " " + rndEl(end);
 }
 
 function do15puzzle(mirrored) {
@@ -1470,8 +1471,8 @@ function do15puzzle(mirrored) {
     done,
     r,
     lastr = 5;
-  ss[0] = "";
-  for (k = 0; k < len; k++) {
+  scramblerGlobals.ss[0] = "";
+  for (k = 0; k < scramblerGlobals.len; k++) {
     done = false;
     while (!done) {
       r = Math.floor(Math.random() * 4);
@@ -1485,7 +1486,7 @@ function do15puzzle(mirrored) {
         done = true;
         x += effect[r][0];
         y += effect[r][1];
-        ss[0] += moves[r] + " ";
+        scramblerGlobals.ss[0] += moves[r] + " ";
         lastr = r;
       }
     }
@@ -1494,16 +1495,17 @@ function do15puzzle(mirrored) {
 
 function pochscramble(x, y, wca: boolean = false) {
   var i, j, n;
-  for (n = 0; n < num; n++) {
+  for (n = 0; n < scramblerGlobals.num; n++) {
     for (i = 0; i < y; i++) {
-      ss[n] += "<br>&nbsp;&nbsp;";
+      scramblerGlobals.ss[n] += "<br>&nbsp;&nbsp;";
       for (j = 0; j < x - (wca ? 1 : 0); j++) {
-        ss[n] += (j % 2 == 0 ? "R" : "D") + rndEl(["++", "--"]) + " ";
+        scramblerGlobals.ss[n] +=
+          (j % 2 == 0 ? "R" : "D") + rndEl(["++", "--"]) + " ";
       }
       if (wca) {
-        ss[n] += rndEl(["D++ U", "D-- U'"]);
+        scramblerGlobals.ss[n] += rndEl(["D++ U", "D-- U'"]);
       } else {
-        ss[n] += "U" + rndEl(["'", " "]);
+        scramblerGlobals.ss[n] += "U" + rndEl(["'", " "]);
       }
     }
   }
@@ -1511,24 +1513,24 @@ function pochscramble(x, y, wca: boolean = false) {
 
 function carrotminx(x, y) {
   var i, j, n;
-  for (n = 0; n < num; n++) {
+  for (n = 0; n < scramblerGlobals.num; n++) {
     for (i = 0; i < y; i++) {
-      ss[n] += "<br>&nbsp;&nbsp;";
+      scramblerGlobals.ss[n] += "<br>&nbsp;&nbsp;";
       for (j = 0; j < x / 2; j++) {
-        ss[n] += rndEl(["+", "-"]) + rndEl(["+", "-"]) + " ";
+        scramblerGlobals.ss[n] += rndEl(["+", "-"]) + rndEl(["+", "-"]) + " ";
       }
-      ss[n] += "U" + rndEl(["'", " "]);
+      scramblerGlobals.ss[n] += "U" + rndEl(["'", " "]);
     }
   }
 }
 
 function gigascramble() {
   var i, j, n;
-  for (n = 0; n < num; n++) {
-    for (i = 0; i < Math.ceil(len / 10); i++) {
-      ss[n] += "<br>&nbsp;&nbsp;";
+  for (n = 0; n < scramblerGlobals.num; n++) {
+    for (i = 0; i < Math.ceil(scramblerGlobals.len / 10); i++) {
+      scramblerGlobals.ss[n] += "<br>&nbsp;&nbsp;";
       for (j = 0; j < 10; j++) {
-        ss[n] +=
+        scramblerGlobals.ss[n] +=
           (j % 2 == 0
             ? Math.random() > 0.5
               ? "R"
@@ -1539,41 +1541,41 @@ function gigascramble() {
           rndEl(["+", "++", "-", "--"]) +
           " ";
       }
-      ss[n] += "y" + rndEl(minxsuff);
+      scramblerGlobals.ss[n] += "y" + rndEl(scramblerGlobals.minxsuff);
     }
   }
 }
 
 function sq1_scramble(type) {
-  seq = [];
+  scramblerGlobals.seq = [];
   var i, k, n;
-  sq1_getseq(num, type);
-  for (n = 0; n < num; n++) {
+  sq1_getseq(scramblerGlobals.num, type);
+  for (n = 0; n < scramblerGlobals.num; n++) {
     var s = "";
-    for (i = 0; i < seq[n].length; i++) {
-      k = seq[n][i];
+    for (i = 0; i < scramblerGlobals.seq[n].length; i++) {
+      k = scramblerGlobals.seq[n][i];
       if (k[0] == 7) {
         s += "/";
       } else {
         s += " (" + k[0] + "," + k[1] + ") ";
       }
     }
-    ss[n] += s;
+    scramblerGlobals.ss[n] += s;
   }
 }
 
 function ssq1t_scramble() {
-  seq = [];
+  scramblerGlobals.seq = [];
   var i, n;
-  sq1_getseq(num * 2, 0);
-  for (n = 0; n < num; n++) {
-    var s = seq[2 * n],
-      t = seq[2 * n + 1],
+  sq1_getseq(scramblerGlobals.num * 2, 0);
+  for (n = 0; n < scramblerGlobals.num; n++) {
+    var s = scramblerGlobals.seq[2 * n],
+      t = scramblerGlobals.seq[2 * n + 1],
       u = "",
       k;
     if (s[0][0] == 7) s = [[0, 0]].concat(s);
     if (t[0][0] == 7) t = [[0, 0]].concat(t);
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < scramblerGlobals.len; i++) {
       u +=
         "(" +
         s[2 * i][0] +
@@ -1585,13 +1587,13 @@ function ssq1t_scramble() {
         s[2 * i][1] +
         ") / ";
     }
-    ss[n] += u;
+    scramblerGlobals.ss[n] += u;
   }
 }
 
 function sq1_getseq(num, type) {
   for (var n = 0; n < num; n++) {
-    p = [
+    scramblerGlobals.p = [
       1,
       0,
       0,
@@ -1617,19 +1619,23 @@ function sq1_getseq(num, type) {
       1,
       0,
     ];
-    seq[n] = [];
+    scramblerGlobals.seq[n] = [];
     var cnt = 0;
-    while (cnt < len) {
+    while (cnt < scramblerGlobals.len) {
       var x = Math.floor(Math.random() * 12) - 5;
       var y = type == 2 ? 0 : Math.floor(Math.random() * 12) - 5;
       var size = (x == 0 ? 0 : 1) + (y == 0 ? 0 : 1);
-      if ((cnt + size <= len || type != 1) && (size > 0 || cnt == 0)) {
+      if (
+        (cnt + size <= scramblerGlobals.len || type != 1) &&
+        (size > 0 || cnt == 0)
+      ) {
         if (sq1_domove(x, y)) {
           if (type == 1) cnt += size;
-          if (size > 0) seq[n][seq[n].length] = [x, y];
-          if (cnt < len || type != 1) {
+          if (size > 0)
+            scramblerGlobals.seq[n][scramblerGlobals.seq[n].length] = [x, y];
+          if (cnt < scramblerGlobals.len || type != 1) {
             cnt++;
-            seq[n][seq[n].length] = [7, 0];
+            scramblerGlobals.seq[n][scramblerGlobals.seq[n].length] = [7, 0];
             sq1_domove(7, 0);
           }
         }
@@ -1642,26 +1648,26 @@ function sq1_domove(x, y) {
   var i, temp, px, py;
   if (x == 7) {
     for (i = 0; i < 6; i++) {
-      temp = p[i + 6];
-      p[i + 6] = p[i + 12];
-      p[i + 12] = temp;
+      temp = scramblerGlobals.p[i + 6];
+      scramblerGlobals.p[i + 6] = scramblerGlobals.p[i + 12];
+      scramblerGlobals.p[i + 12] = temp;
     }
     return true;
   } else {
     if (
-      p[(17 - x) % 12] ||
-      p[(11 - x) % 12] ||
-      p[12 + ((17 - y) % 12)] ||
-      p[12 + ((11 - y) % 12)]
+      scramblerGlobals.p[(17 - x) % 12] ||
+      scramblerGlobals.p[(11 - x) % 12] ||
+      scramblerGlobals.p[12 + ((17 - y) % 12)] ||
+      scramblerGlobals.p[12 + ((11 - y) % 12)]
     ) {
       return false;
     } else {
       // do the move itself
-      px = p.slice(0, 12);
-      py = p.slice(12, 24);
+      px = scramblerGlobals.p.slice(0, 12);
+      py = scramblerGlobals.p.slice(12, 24);
       for (i = 0; i < 12; i++) {
-        p[i] = px[(12 + i - x) % 12];
-        p[i + 12] = py[(12 + i - y) % 12];
+        scramblerGlobals.p[i] = px[(12 + i - x) % 12];
+        scramblerGlobals.p[i + 12] = py[(12 + i - y) % 12];
       }
       return true;
     }
@@ -1701,17 +1707,17 @@ function oldminxscramble() {
     "010110100100",
   ];
   // now generate the scramble(s)
-  for (i = 0; i < num; i++) {
+  for (i = 0; i < scramblerGlobals.num; i++) {
     var s = "";
     for (j = 0; j < 12; j++) {
       used[j] = 0;
     }
-    for (j = 0; j < len; j++) {
+    for (j = 0; j < scramblerGlobals.len; j++) {
       var done = false;
       do {
         var face = Math.floor(Math.random() * 12);
         if (used[face] == 0) {
-          s += faces[face] + rndEl(minxsuff) + " ";
+          s += faces[face] + rndEl(scramblerGlobals.minxsuff) + " ";
           for (k = 0; k < 12; k++) {
             if (adj[face].charAt(k) == "1") {
               used[k] = 0;
@@ -1722,7 +1728,7 @@ function oldminxscramble() {
         }
       } while (!done);
     }
-    ss[i] += s;
+    scramblerGlobals.ss[i] += s;
   }
 }
 
@@ -1801,7 +1807,7 @@ function bicube() {
     j,
     x,
     y;
-  while (arr.length < len) {
+  while (arr.length < scramblerGlobals.len) {
     poss = [1, 1, 1, 1];
     for (j = 0; j < 4; j++) {
       if (poss[j] == 1 && !canMove(j)) poss[j] = 0;
@@ -1829,10 +1835,10 @@ function bicube() {
       }
     }
   }
-  for (i = 0; i < len; i++) {
-    s += move[arr[i][0]] + cubesuff[arr[i][1] - 1] + " ";
+  for (i = 0; i < scramblerGlobals.len; i++) {
+    s += move[arr[i][0]] + scramblerGlobals.cubesuff[arr[i][1] - 1] + " ";
   }
-  ss[0] += s;
+  scramblerGlobals.ss[0] += s;
 }
 
 function yj4x4() {
@@ -1850,7 +1856,7 @@ function yj4x4() {
     k;
   var s = "";
   lastaxis = -1;
-  for (j = 0; j < len; j++) {
+  for (j = 0; j < scramblerGlobals.len; j++) {
     var done = 0;
     do {
       var first = Math.floor(Math.random() * turns.length);
@@ -1858,20 +1864,22 @@ function yj4x4() {
       if (first != lastaxis || donemoves[second] == 0) {
         if (first == lastaxis) {
           donemoves[second] = 1;
-          var rs = Math.floor(Math.random() * cubesuff.length);
+          var rs = Math.floor(Math.random() * scramblerGlobals.cubesuff.length);
           if (first == 0 && second == 0) {
             fpos = (fpos + 4 + rs) % 4;
           }
           if (first == 1 && second == 2) {
             // r or l
-            if (fpos == 0 || fpos == 3) s += "l" + cubesuff[rs] + " ";
-            else s += "r" + cubesuff[rs] + " ";
+            if (fpos == 0 || fpos == 3)
+              s += "l" + scramblerGlobals.cubesuff[rs] + " ";
+            else s += "r" + scramblerGlobals.cubesuff[rs] + " ";
           } else if (first == 2 && second == 2) {
             // f or b
-            if (fpos == 0 || fpos == 1) s += "b" + cubesuff[rs] + " ";
-            else s += "f" + cubesuff[rs] + " ";
+            if (fpos == 0 || fpos == 1)
+              s += "b" + scramblerGlobals.cubesuff[rs] + " ";
+            else s += "f" + scramblerGlobals.cubesuff[rs] + " ";
           } else {
-            s += turns[first][second] + cubesuff[rs] + " ";
+            s += turns[first][second] + scramblerGlobals.cubesuff[rs] + " ";
           }
         } else {
           for (k = 0; k < turns[first].length; k++) {
@@ -1879,27 +1887,29 @@ function yj4x4() {
           }
           lastaxis = first;
           donemoves[second] = 1;
-          var rs = Math.floor(Math.random() * cubesuff.length);
+          var rs = Math.floor(Math.random() * scramblerGlobals.cubesuff.length);
           if (first == 0 && second == 0) {
             fpos = (fpos + 4 + rs) % 4;
           }
           if (first == 1 && second == 2) {
             // r or l
-            if (fpos == 0 || fpos == 3) s += "l" + cubesuff[rs] + " ";
-            else s += "r" + cubesuff[rs] + " ";
+            if (fpos == 0 || fpos == 3)
+              s += "l" + scramblerGlobals.cubesuff[rs] + " ";
+            else s += "r" + scramblerGlobals.cubesuff[rs] + " ";
           } else if (first == 2 && second == 2) {
             // f or b
-            if (fpos == 0 || fpos == 1) s += "b" + cubesuff[rs] + " ";
-            else s += "f" + cubesuff[rs] + " ";
+            if (fpos == 0 || fpos == 1)
+              s += "b" + scramblerGlobals.cubesuff[rs] + " ";
+            else s += "f" + scramblerGlobals.cubesuff[rs] + " ";
           } else {
-            s += turns[first][second] + cubesuff[rs] + " ";
+            s += turns[first][second] + scramblerGlobals.cubesuff[rs] + " ";
           }
         }
         done = 1;
       }
     } while (done == 0);
   }
-  ss[i] += s;
+  scramblerGlobals.ss[i] += s;
 }
 
 function helicubescramble() {
@@ -1935,12 +1945,12 @@ function helicubescramble() {
     "000000111010",
   ];
   // now generate the scramble(s)
-  for (i = 0; i < num; i++) {
+  for (i = 0; i < scramblerGlobals.num; i++) {
     var s = "";
     for (j = 0; j < 12; j++) {
       used[j] = 0;
     }
-    for (j = 0; j < len; j++) {
+    for (j = 0; j < scramblerGlobals.len; j++) {
       var done = false;
       do {
         var face = Math.floor(Math.random() * 12);
@@ -1956,7 +1966,7 @@ function helicubescramble() {
         }
       } while (!done);
     }
-    ss[i] += s;
+    scramblerGlobals.ss[i] += s;
   }
 }
 
@@ -2241,51 +2251,9 @@ function get2x2optscramble(mn) {
     i[n] = o;
   }
   z();
-  for (var i = 0; i < num; i++) {
+  for (var i = 0; i < scramblerGlobals.num; i++) {
     mx();
-    ss[i] += sv();
-  }
-}
-
-/* Function by Kas Thomas, http://www.planetpdf.com/developer/article.asp?ContentID=testing_for_object_types_in_ja */
-function isArray(obj) {
-  if (typeof obj == "object") {
-    var test = obj.constructor.toString().match(/array/i);
-    return test != null;
-  }
-  return false;
-}
-
-function megascramble(turns, suffixes) {
-  var donemoves = [];
-  var lastaxis;
-  var i, j, k;
-  for (i = 0; i < num; i++) {
-    var s = "";
-    lastaxis = -1;
-    for (j = 0; j < len; j++) {
-      var done = 0;
-      do {
-        var first = Math.floor(Math.random() * turns.length);
-        var second = Math.floor(Math.random() * turns[first].length);
-        if (first != lastaxis) {
-          for (k = 0; k < turns[first].length; k++) {
-            donemoves[k] = 0;
-          }
-          lastaxis = first;
-        }
-        if (donemoves[second] == 0) {
-          donemoves[second] = 1;
-          if (isArray(turns[first][second])) {
-            s += rndEl(turns[first][second]) + rndEl(suffixes) + " ";
-          } else {
-            s += turns[first][second] + rndEl(suffixes) + " ";
-          }
-          done = 1;
-        }
-      } while (done == 0);
-    }
-    ss[i] += s;
+    scramblerGlobals.ss[i] += sv();
   }
 }
 
@@ -2300,7 +2268,7 @@ function megascramble(turns, suffixes) {
 function scramble2222(turnpairs, suffix_a, suffix_b, suffix_x) {
   var j;
   var s = "";
-  for (j = 0; j < len; j++) {
+  for (j = 0; j < scramblerGlobals.len; j++) {
     var whichpair = j % 2;
     var whichorder = Math.random() < 0.5;
     do {
@@ -2375,5 +2343,5 @@ function scramble2222(turnpairs, suffix_a, suffix_b, suffix_x) {
     else s += a;
     s += " ";
   }
-  ss[0] += s;
+  scramblerGlobals.ss[0] += s;
 }
