@@ -226,7 +226,7 @@ function toggleNightMode() {
   }
 }
 
-export const optionsWindowGLobals = {
+export const optionsWindowGlobals = {
   changeColor,
   decreaseScrambleSize,
   decreaseSize,

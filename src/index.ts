@@ -1,4 +1,4 @@
-import { optionsWindowGLobals } from "./legacy/options";
+import { optionsWindowGlobals } from "./legacy/options";
 import { qqtimerWindowGlobals, initialize } from "./legacy/qqtimer";
 import { statsWindowGlobals } from "./legacy/stats";
 import { stopTimer } from "./legacy/timing";
@@ -12,7 +12,7 @@ for (const [name, fn] of Object.entries(statsWindowGlobals)) {
   globalThis[name] = fn;
 }
 
-for (const [name, fn] of Object.entries(optionsWindowGLobals)) {
+for (const [name, fn] of Object.entries(optionsWindowGlobals)) {
   globalThis[name] = fn;
 }
 
