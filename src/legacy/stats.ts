@@ -688,6 +688,7 @@ export const statsWindowGlobals = {
   changeAvgN,
   changeMoN,
   changeNotes,
+  getStats,
   importTimes,
   setHighlight,
 };

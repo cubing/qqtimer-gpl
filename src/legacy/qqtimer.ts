@@ -360,6 +360,7 @@ export const qqtimerWindowGlobals = {
   comment,
   del,
   getlastscramble,
+  loadList,
   resetTimes,
   setCookie,
 };
