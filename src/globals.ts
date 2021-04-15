@@ -39,7 +39,40 @@ class StatsGlobalVars {
   bestMoIndex;
 }
 
+class OptionsGlobalVars {
+  useMilli = 0;
+  manualEnter = 0;
+  showOptions = 0;
+  timerSize = 2;
+  scrambleSize = 16;
+  inspection = 0;
+  useBld = 0;
+  penalty = 0;
+  useAvgN = 0;
+  viewstats = 1;
+  importFocus = 0;
+  typingFocus = false;
+  validColors = [
+    "black",
+    "brown",
+    "white",
+    "purple",
+    "violet",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "cyan",
+    "blue",
+    "gray",
+    "grey",
+    "pink",
+  ];
+  highlightColor;
+}
+
 export const globals = {
   main: new MainGlobalVars(),
   stats: new StatsGlobalVars(),
+  options: new OptionsGlobalVars(),
 };

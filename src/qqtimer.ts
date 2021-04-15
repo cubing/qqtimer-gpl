@@ -53,7 +53,7 @@ export function initialize(lookForTimes, checkQueryString) {
     globals.main.scrambleArr = [];
     window.focus();
   }
-  showOptions = 0;
+  globals.options.showOptions = 0;
   //toggleOptions(); // options are shown by default
   globals.stats.avgSizes = [50, 5, 12, 100, 1000];
   globals.stats.moSize = 3;
@@ -97,11 +97,11 @@ export function initialize(lookForTimes, checkQueryString) {
       : "inspection only";
   let useMilli = getCookieNumber("useMilli", 1);
   $("millisec").innerHTML = useMilli == 1 ? "1/1000 sec" : "1/100 sec";
-  var oldManualEnter = manualEnter;
-  manualEnter = getCookieNumber("manualEnter", 1);
-  if (manualEnter != oldManualEnter) {
+  var oldManualEnter = globals.options.manualEnter;
+  globals.options.manualEnter = getCookieNumber("manualEnter", 1);
+  if (globals.options.manualEnter != oldManualEnter) {
     toggleInput();
-    manualEnter = 1 - manualEnter;
+    globals.options.manualEnter = 1 - globals.options.manualEnter;
   }
   $<HTMLInputElement>("tcol").value = getCookieWithDefault("tColor", "00ff00");
   $<HTMLInputElement>("bcol").value = getCookieWithDefault("bColor", "white");
@@ -112,32 +112,36 @@ export function initialize(lookForTimes, checkQueryString) {
     "memColor",
     "green"
   );
-  $("inputTimes").innerHTML = manualEnter == 1 ? "typing" : "timer";
+  $("inputTimes").innerHTML =
+    globals.options.manualEnter == 1 ? "typing" : "timer";
   $<HTMLSpanElement>("theTime").innerHTML =
-    manualEnter == 1
+    globals.options.manualEnter == 1
       ? "<input id='timeEntry' size=12 style='font-size:100%'>" +
         " <span onclick='stopTimer(13);' class='a' style='color:" +
         parseColor($<HTMLInputElement>("lcol").value) +
         "'>enter</span>"
       : "ready";
-  timerSize = getCookieNumber("timerSize", 2);
-  $<HTMLSpanElement>("theTime").style.fontSize = timerSize + "em";
-  scrambleSize = getCookieNumber("scrSize", 16);
-  $("scramble").style.fontSize = scrambleSize + "px";
-  $("getlast").style.fontSize = scrambleSize + "px";
-  $("theList").style.height = Math.max(16, timerSize * 1.5) + "em";
-  $("stats").style.height = Math.max(16, timerSize * 1.5) + "em";
-  inspection = getCookieNumber("inspection", 0);
-  $("inspec").innerHTML = inspection == 1 ? "WCA" : "no";
-  if (inspection == 0) {
-    useBld = getCookieNumber("useBld", 0);
+  globals.options.timerSize = getCookieNumber("timerSize", 2);
+  $<HTMLSpanElement>("theTime").style.fontSize =
+    globals.options.timerSize + "em";
+  globals.options.scrambleSize = getCookieNumber("scrSize", 16);
+  $("scramble").style.fontSize = globals.options.scrambleSize + "px";
+  $("getlast").style.fontSize = globals.options.scrambleSize + "px";
+  $("theList").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
+  $("stats").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
+  globals.options.inspection = getCookieNumber("inspection", 0);
+  $("inspec").innerHTML = globals.options.inspection == 1 ? "WCA" : "no";
+  if (globals.options.inspection == 0) {
+    globals.options.useBld = getCookieNumber("useBld", 0);
   } else {
-    useBld = 0;
+    globals.options.useBld = 0;
     setCookie("useBld", 0);
   }
-  $("bldmode").innerHTML = useBld == 1 ? "on" : "off";
-  useAvgN = getCookieNumber("useAvgN", 0);
-  $("avgn").innerHTML = useAvgN == 1 ? "using" : "not using";
+  $("bldmode").innerHTML = globals.options.useBld == 1 ? "on" : "off";
+  globals.options.useAvgN = getCookieNumber("useAvgN", 0);
+  $("avgn").innerHTML = globals.options.useAvgN == 1 ? "using" : "not using";
   globals.main.useMoN = getCookieNumber("useMoN", 0);
   $("mon").innerHTML = globals.main.useMoN == 1 ? "using" : "not using";
   globals.main.useMono = getCookieNumber("useMono", 0);
@@ -218,22 +222,22 @@ function loadOptBoxes() {
 function startTimer(keyCode) {
   if (
     globals.main.timerStatus == 0 &&
-    manualEnter == 0 &&
+    globals.options.manualEnter == 0 &&
     keyCode == 32 &&
-    importFocus == 0
+    globals.options.importFocus == 0
   ) {
     globals.main.timerStatus = 3;
   } else if (
     globals.main.timerStatus == 3 &&
-    manualEnter == 0 &&
+    globals.options.manualEnter == 0 &&
     keyCode == 32 &&
     new Date().getTime() - globals.main.curTime.getTime() >= 300 &&
-    importFocus == 0
+    globals.options.importFocus == 0
   ) {
     if (getScrambleType() == "sqrs") {
       $("scramble").innerHTML = "scramble: loading... ";
     }
-    if (inspection == 1) {
+    if (globals.options.inspection == 1) {
       globals.main.timerStatus = 2;
       globals.main.inspectionTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = "red";
@@ -245,7 +249,7 @@ function startTimer(keyCode) {
       } else {
         $<HTMLSpanElement>("theTime").innerHTML = "inspecting";
       }
-    } else if (useBld == 1) {
+    } else if (globals.options.useBld == 1) {
       globals.main.timerStatus = 4;
       globals.main.memoTime = new Date();
       $<HTMLSpanElement>("theTime").style.color = $<HTMLInputElement>(
@@ -262,7 +266,7 @@ function startTimer(keyCode) {
     } else {
       globals.main.timerStatus = 1;
       globals.main.startTime = new Date();
-      penalty = 0;
+      globals.options.penalty = 0;
       $<HTMLSpanElement>("theTime").style.color = globals.main.nightMode
         ? "#fff"
         : $<HTMLInputElement>("fcol").value;
@@ -300,7 +304,8 @@ function startTimer(keyCode) {
       : $<HTMLInputElement>("fcol").value;
     var inspecLength =
       globals.main.startTime.getTime() - globals.main.inspectionTime.getTime();
-    penalty = inspecLength < 15000 ? 0 : inspecLength < 17000 ? 2 : 1;
+    globals.options.penalty =
+      inspecLength < 15000 ? 0 : inspecLength < 17000 ? 2 : 1;
     clearInterval(globals.main.inspectionID);
     if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
       globals.main.timerID = setInterval(
@@ -318,7 +323,7 @@ function stopTimer(keyCode?: number) {
     $<HTMLSelectElement>("optbox").blur();
     $<HTMLInputElement>("leng").blur();
   }
-  if (manualEnter == 1) {
+  if (globals.options.manualEnter == 1) {
     if (keyCode == 13) {
       var timeStr = $<HTMLInputElement>("timeEntry").value;
       var nonzero = false;
@@ -359,7 +364,7 @@ function stopTimer(keyCode?: number) {
     if (globals.main.timerupdate == 1 || globals.main.timerupdate == 2) {
       clearInterval(globals.main.timerID);
     }
-    getTime(penalty);
+    getTime(globals.options.penalty);
     globals.main.scrambleArr[globals.main.scrambleArr.length] = getScramble();
     rescramble3();
   }
@@ -368,20 +373,23 @@ function stopTimer(keyCode?: number) {
 function checkKey(keyCode, shiftKey) {
   if (
     keyCode == 13 ||
-    (manualEnter == 0 &&
+    (globals.options.manualEnter == 0 &&
       globals.main.timerStatus != 0 &&
       globals.main.timerStatus != 3)
   ) {
     // normally, any key enters a time; with manual enter, only Enter does
     stopTimer(keyCode);
-  } else if (keyCode == 8 && manualEnter == 0) {
+  } else if (keyCode == 8 && globals.options.manualEnter == 0) {
     // backspace applies DNF
     if (globals.main.notes[globals.main.notes.length - 1] == 1) {
       changeNotes(0);
     } else {
       changeNotes(1);
     }
-  } else if ((keyCode == 61 || keyCode == 187) && manualEnter == 0) {
+  } else if (
+    (keyCode == 61 || keyCode == 187) &&
+    globals.options.manualEnter == 0
+  ) {
     // +/= applies +2 penalty
     if (globals.main.notes[globals.main.notes.length - 1] == 2) {
       changeNotes(0);
@@ -435,7 +443,7 @@ function updateInspec() {
 function getTime(note) {
   globals.main.curTime = new Date();
 
-  if (useBld == 1) {
+  if (globals.options.useBld == 1) {
     var time = globals.main.curTime.getTime() - globals.main.memoTime.getTime();
     var mtime =
       globals.main.startTime.getTime() - globals.main.memoTime.getTime();
@@ -445,7 +453,7 @@ function getTime(note) {
   }
   globals.main.times[globals.main.times.length] = time;
   globals.main.notes[globals.main.notes.length] = note;
-  if (useBld == 1) {
+  if (globals.options.useBld == 1) {
     globals.main.comments[globals.main.comments.length] = pretty(mtime);
   } else {
     globals.main.comments[globals.main.comments.length] = "";
@@ -525,7 +533,10 @@ function loadList() {
   }
   for (var i = 0; i < globals.main.times.length; i++) {
     if (i == globals.main.highlightStart) {
-      s += "<span style='background-color: " + highlightColor + "'>";
+      s +=
+        "<span style='background-color: " +
+        globals.options.highlightColor +
+        "'>";
     }
     if (
       data[1].indexOf(i - globals.main.highlightStart) > -1 ||
@@ -639,43 +650,13 @@ function getBrowser() {
 
 // #################### OPTIONS ####################
 
-var useMilli = 0;
-var manualEnter = 0;
-var showOptions = 0;
-var timerSize = 2;
-var scrambleSize = 16;
-var inspection = 0;
-var useBld = 0;
-var penalty = 0;
-var useAvgN = 0;
-var viewstats = 1;
-var importFocus = 0;
-var typingFocus = false;
-var validColors = [
-  "black",
-  "brown",
-  "white",
-  "purple",
-  "violet",
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "cyan",
-  "blue",
-  "gray",
-  "grey",
-  "pink",
-];
-var highlightColor;
-
 function toggleImport() {
   if ($("import").style.display == "block") {
     $("import").style.display = "none";
-    importFocus = 0;
+    globals.options.importFocus = 0;
   } else {
     $("import").style.display = "block";
-    importFocus = 1;
+    globals.options.importFocus = 1;
   }
 }
 
@@ -694,19 +675,20 @@ function toggleTimer() {
 }
 
 function toggleMilli() {
-  useMilli = 1 - useMilli;
-  setCookie("useMilli", useMilli);
-  $("millisec").innerHTML = useMilli == 1 ? "1/1000 sec" : "1/100 sec";
+  globals.options.useMilli = 1 - globals.options.useMilli;
+  setCookie("useMilli", globals.options.useMilli);
+  $("millisec").innerHTML =
+    globals.options.useMilli == 1 ? "1/1000 sec" : "1/100 sec";
   loadList();
   getStats(true);
 }
 
 function toggleBld() {
-  if (inspection == 0) {
-    useBld = 1 - useBld;
+  if (globals.options.inspection == 0) {
+    globals.options.useBld = 1 - globals.options.useBld;
   }
-  setCookie("useBld", useBld);
-  $("bldmode").innerHTML = useBld == 1 ? "on" : "off";
+  setCookie("useBld", globals.options.useBld);
+  $("bldmode").innerHTML = globals.options.useBld == 1 ? "on" : "off";
 }
 
 function toggleMono() {
@@ -719,13 +701,14 @@ function toggleMono() {
 }
 
 function toggleInput() {
-  if (manualEnter == 0) stopTimer();
-  manualEnter = 1 - manualEnter;
-  typingFocus = false;
-  setCookie("manualEnter", manualEnter);
-  $("inputTimes").innerHTML = manualEnter == 1 ? "typing" : "timer";
+  if (globals.options.manualEnter == 0) stopTimer();
+  globals.options.manualEnter = 1 - globals.options.manualEnter;
+  globals.options.typingFocus = false;
+  setCookie("manualEnter", globals.options.manualEnter);
+  $("inputTimes").innerHTML =
+    globals.options.manualEnter == 1 ? "typing" : "timer";
   $<HTMLSpanElement>("theTime").innerHTML =
-    manualEnter == 1
+    globals.options.manualEnter == 1
       ? "<input id='timeEntry' size=12 style='font-size:100%'>" +
         " <span onclick='stopTimer(13);' class='a' style='color:" +
         parseColor($<HTMLInputElement>("lcol").value) +
@@ -733,65 +716,71 @@ function toggleInput() {
       : "ready";
   if ($<HTMLInputElement>("timeEntry") != null) {
     $<HTMLInputElement>("timeEntry").onfocus = function () {
-      typingFocus = true;
+      globals.options.typingFocus = true;
     };
     $<HTMLInputElement>("timeEntry").onblur = function () {
-      typingFocus = false;
+      globals.options.typingFocus = false;
     };
   }
 }
 
 function toggleOptions() {
-  showOptions = 1 - showOptions;
-  $("showOpt").innerHTML = showOptions == 1 ? "hide" : "show";
-  $("options").style.display = showOptions == 1 ? "" : "none";
+  globals.options.showOptions = 1 - globals.options.showOptions;
+  $("showOpt").innerHTML = globals.options.showOptions == 1 ? "hide" : "show";
+  $("options").style.display = globals.options.showOptions == 1 ? "" : "none";
 }
 
 function increaseSize() {
-  timerSize++;
-  setCookie("timerSize", timerSize);
-  $<HTMLSpanElement>("theTime").style.fontSize = timerSize + "em";
-  $("theList").style.height = Math.max(16, timerSize * 1.5) + "em";
-  $("stats").style.height = Math.max(16, timerSize * 1.5) + "em";
+  globals.options.timerSize++;
+  setCookie("timerSize", globals.options.timerSize);
+  $<HTMLSpanElement>("theTime").style.fontSize =
+    globals.options.timerSize + "em";
+  $("theList").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
+  $("stats").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
 }
 
 function decreaseSize() {
-  if (timerSize >= 2) timerSize--;
-  setCookie("timerSize", timerSize);
-  $<HTMLSpanElement>("theTime").style.fontSize = timerSize + "em";
-  $("theList").style.height = Math.max(16, timerSize * 1.5) + "em";
-  $("stats").style.height = Math.max(16, timerSize * 1.5) + "em";
+  if (globals.options.timerSize >= 2) globals.options.timerSize--;
+  setCookie("timerSize", globals.options.timerSize);
+  $<HTMLSpanElement>("theTime").style.fontSize =
+    globals.options.timerSize + "em";
+  $("theList").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
+  $("stats").style.height =
+    Math.max(16, globals.options.timerSize * 1.5) + "em";
 }
 
 function increaseScrambleSize() {
-  scrambleSize += 4;
-  setCookie("scrSize", scrambleSize);
-  $("scramble").style.fontSize = scrambleSize + "px";
-  $("getlast").style.fontSize = scrambleSize + "px";
+  globals.options.scrambleSize += 4;
+  setCookie("scrSize", globals.options.scrambleSize);
+  $("scramble").style.fontSize = globals.options.scrambleSize + "px";
+  $("getlast").style.fontSize = globals.options.scrambleSize + "px";
 }
 
 function decreaseScrambleSize() {
-  if (scrambleSize > 8) scrambleSize -= 4;
-  setCookie("scrSize", scrambleSize);
-  $("scramble").style.fontSize = scrambleSize + "px";
-  $("getlast").style.fontSize = scrambleSize + "px";
+  if (globals.options.scrambleSize > 8) globals.options.scrambleSize -= 4;
+  setCookie("scrSize", globals.options.scrambleSize);
+  $("scramble").style.fontSize = globals.options.scrambleSize + "px";
+  $("getlast").style.fontSize = globals.options.scrambleSize + "px";
 }
 
 function toggleInspection() {
-  inspection = 1 - inspection;
-  if (inspection == 1) {
-    useBld = 0;
+  globals.options.inspection = 1 - globals.options.inspection;
+  if (globals.options.inspection == 1) {
+    globals.options.useBld = 0;
   }
-  setCookie("useBld", useBld);
-  setCookie("inspection", inspection);
-  $("inspec").innerHTML = inspection == 1 ? "WCA" : "no";
-  $("bldmode").innerHTML = useBld == 1 ? "on" : "off";
+  setCookie("useBld", globals.options.useBld);
+  setCookie("inspection", globals.options.inspection);
+  $("inspec").innerHTML = globals.options.inspection == 1 ? "WCA" : "no";
+  $("bldmode").innerHTML = globals.options.useBld == 1 ? "on" : "off";
 }
 
 function toggleAvgN() {
-  useAvgN = 1 - useAvgN;
-  setCookie("useAvgN", useAvgN);
-  $("avgn").innerHTML = useAvgN == 1 ? "using" : "not using";
+  globals.options.useAvgN = 1 - globals.options.useAvgN;
+  setCookie("useAvgN", globals.options.useAvgN);
+  $("avgn").innerHTML = globals.options.useAvgN == 1 ? "using" : "not using";
   getStats(true);
 }
 
@@ -803,8 +792,8 @@ function toggleMoN() {
 }
 
 function toggleStatView() {
-  viewstats = 1 - viewstats;
-  getStats(viewstats);
+  globals.options.viewstats = 1 - globals.options.viewstats;
+  getStats(globals.options.viewstats);
 }
 
 function changeColor() {
@@ -837,7 +826,9 @@ function changeColor() {
     }
   }
 
-  highlightColor = parseColor($<HTMLInputElement>("hcol").value);
+  globals.options.highlightColor = parseColor(
+    $<HTMLInputElement>("hcol").value
+  );
   $("getlast").style.color = parseColor($<HTMLInputElement>("lcol").value);
   setCookie("tColor", $<HTMLInputElement>("tcol").value);
   setCookie("bColor", $<HTMLInputElement>("bcol").value);
@@ -848,8 +839,8 @@ function changeColor() {
 }
 
 function parseColor(str) {
-  for (var i = 0; i < validColors.length; i++) {
-    if (str == validColors[i]) {
+  for (var i = 0; i < globals.options.validColors.length; i++) {
+    if (str == globals.options.validColors[i]) {
       return str;
     }
   }
@@ -1097,7 +1088,9 @@ function getSession() {
 // #################### STATISTICS ####################
 
 function getStats(recalc) {
-  var avgSizes2 = globals.stats.avgSizes.slice(1 - useAvgN).sort(numsort);
+  var avgSizes2 = globals.stats.avgSizes
+    .slice(1 - globals.options.useAvgN)
+    .sort(numsort);
   var numdnf: number = 0,
     sessionavg,
     sessionmean;
@@ -1181,14 +1174,14 @@ function getStats(recalc) {
 
   var s =
     "stats: (<span id='hidestats' onclick='toggleStatView()' class='a'>" +
-    (viewstats ? "hide" : "show") +
+    (globals.options.viewstats ? "hide" : "show") +
     "</span>)<br>";
   s +=
     "number of times: " +
     (globals.main.times.length - numdnf) +
     "/" +
     globals.main.times.length;
-  if (viewstats) {
+  if (globals.options.viewstats) {
     s +=
       "<br>best time: <span onclick='setHighlight(" +
       globals.stats.bestTimeIndex +
@@ -1286,7 +1279,9 @@ function getStats(recalc) {
 }
 
 function getAllStats(): AllStatsWithSD {
-  var avgSizes2 = globals.stats.avgSizes.slice(1 - useAvgN).sort(numsort);
+  var avgSizes2 = globals.stats.avgSizes
+    .slice(1 - globals.options.useAvgN)
+    .sort(numsort);
   globals.stats.bestAvg = [
     [-1, 0],
     [-1, 0],
@@ -1484,7 +1479,7 @@ function getAvgSD(start, nsolves, SD): AvgOrMeanWithoutSD | AvgOrMeanWithSD {
         ? -1
         : globals.main.times[start + j] / 10 +
           globals.main.notes[start + j] * 100;
-    t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
+    t = globals.options.useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
 
@@ -1541,7 +1536,7 @@ function getMeanSD(start, nsolves, SD): AvgOrMeanWithSD | AvgOrMeanWithoutSD {
         ? -1
         : globals.main.times[start + j] / 10 +
           globals.main.notes[start + j] * 100;
-    t = useMilli == 0 ? 10 * Math.round(t) : 10 * t;
+    t = globals.options.useMilli == 0 ? 10 * Math.round(t) : 10 * t;
     timeArr[timeArr.length] = [t, j];
   }
 
@@ -1590,9 +1585,9 @@ function pretty(time) {
   if (time < 0) {
     return "DNF";
   }
-  time = Math.round(time / (useMilli == 1 ? 1 : 10));
-  var bits = time % (useMilli == 1 ? 1000 : 100);
-  time = (time - bits) / (useMilli == 1 ? 1000 : 100);
+  time = Math.round(time / (globals.options.useMilli == 1 ? 1 : 10));
+  var bits = time % (globals.options.useMilli == 1 ? 1000 : 100);
+  time = (time - bits) / (globals.options.useMilli == 1 ? 1000 : 100);
   var secs = time % 60;
   var mins = ((time - secs) / 60) % 60;
   var hours = (time - secs - 60 * mins) / 3600;
@@ -1600,7 +1595,7 @@ function pretty(time) {
   if (bits < 10) {
     s = "0" + s;
   }
-  if (bits < 100 && useMilli == 1) {
+  if (bits < 100 && globals.options.useMilli == 1) {
     s = "0" + s;
   }
   s = secs + "." + s;
@@ -1715,7 +1710,7 @@ function importTimes() {
   }
 
   toggleImport();
-  importFocus = 0;
+  globals.options.importFocus = 0;
   clearHighlight();
   loadList();
   getStats(true);
