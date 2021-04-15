@@ -4,7 +4,7 @@ import { globals } from "./globals";
 let loadList;
 let changeColor;
 
-export function setDelegates(newLoadList, newChangeColor) {
+export function setStatsCallbacks(newLoadList, newChangeColor) {
   loadList = newLoadList;
   changeColor = newChangeColor;
 }
