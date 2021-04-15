@@ -1,5 +1,5 @@
-import { qqtimerWindowGlobals, initialize } from "./qqtimer";
-import { statsWindowGlobals } from "./stats";
+import { qqtimerWindowGlobals, initialize } from "./legacy/qqtimer";
+import { statsWindowGlobals } from "./legacy/stats";
 
 for (const [name, fn] of Object.entries(qqtimerWindowGlobals)) {
   globalThis[name] = fn;

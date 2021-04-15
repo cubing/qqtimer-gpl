@@ -2,7 +2,7 @@
 import style0 from "url:./style0.css";
 // @ts-ignore (`url:` is a Parcel-ism)
 import style1 from "url:./style1.css";
-import { globals } from "../globals";
+import { globals } from "../legacy/globals";
 
 export function setStyle(style: "0" | "1"): void {
   const styleSource = style === "0" ? style0 : style1;

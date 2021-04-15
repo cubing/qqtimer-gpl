@@ -1,4 +1,4 @@
-import { $, toggleImport } from "./dom";
+import { $, toggleImport } from "../dom";
 import { globals } from "./globals";
 
 let loadList;

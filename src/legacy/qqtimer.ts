@@ -1,4 +1,4 @@
-import { $, setStyle } from "./dom";
+import { $, setStyle } from "../dom";
 import { globals } from "./globals";
 import {
   clearScramble,
@@ -11,7 +11,7 @@ import {
   scrdata,
   setLen,
   setScrambleType,
-} from "./scramble";
+} from "../scramble";
 import {
   changeNotes,
   clearHighlight,
