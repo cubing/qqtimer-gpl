@@ -13,8 +13,8 @@ import {
   getCookieNumber,
   getCookieWithDefault,
   setCookie,
-} from "./cookies";
-import { globals } from "./globals";
+} from "../model/cookies";
+import { globals } from "../model/globals";
 import {
   changeColor,
   parseColor,
@@ -22,7 +22,7 @@ import {
   toggleInput,
 } from "./options";
 import { rescramble, rescramble2 } from "./rescramble";
-import { getSession, saveSession } from "./session";
+import { getSession, saveSession } from "../model/session";
 import {
   changeNotes,
   clearHighlight,
@@ -306,7 +306,7 @@ function loadList() {
   changeColor();
 }
 
-function del(index) {
+export function del(index) {
   var prettyTime = pretty(globals.main.times[index]);
   if (globals.main.notes[index] == 1) prettyTime = "DNF(" + prettyTime + ")";
   if (globals.main.notes[index] == 2)
@@ -353,6 +353,7 @@ setOptionsCallbacks(loadList);
 
 export const qqtimerWindowGlobals = {
   comment,
+  del,
   getlastscramble,
   setCookie,
 };

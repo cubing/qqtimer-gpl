@@ -7,7 +7,7 @@ import {
   setLen,
   setScrambleType,
 } from "../scramble";
-import { setCookie } from "./cookies";
+import { setCookie } from "../model/cookies";
 
 export function rescramble(scramble) {
   var obj = $<HTMLSelectElement>("optbox");

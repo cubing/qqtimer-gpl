@@ -1,5 +1,5 @@
 import { $, toggleImport } from "../dom";
-import { globals } from "./globals";
+import { globals } from "../model/globals";
 
 let loadList;
 let changeColor;
@@ -341,7 +341,7 @@ function numsort(a, b) {
   return a - b;
 }
 
-function setHighlight(start, nsolves, id) {
+export function setHighlight(start, nsolves, id) {
   // if we're trying to set a highlight that has same ID as the current one, clear it.
   if (id == globals.main.highlightID) {
     clearHighlight();
@@ -698,4 +698,5 @@ export const statsWindowGlobals = {
   changeMoN,
   changeNotes,
   importTimes,
+  setHighlight,
 };

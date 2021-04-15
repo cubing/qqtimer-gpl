@@ -1,6 +1,6 @@
 import { $ } from "../dom";
 import { globals } from "./globals";
-import { clearHighlight } from "./stats";
+import { clearHighlight } from "../legacy/stats";
 
 export function saveSession() {
   var id =

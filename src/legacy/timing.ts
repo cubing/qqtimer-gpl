@@ -1,6 +1,6 @@
 import { $ } from "../dom";
 import { getScramble, getScrambleType } from "../scramble";
-import { globals } from "./globals";
+import { globals } from "../model/globals";
 import { rescramble3 } from "./rescramble";
 import { getStats, parseTime, pretty } from "./stats";
 

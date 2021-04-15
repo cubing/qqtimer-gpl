@@ -1,7 +1,7 @@
 import { $ } from "../dom";
-import { setCookie } from "./cookies";
+import { setCookie } from "../model/cookies";
 import { getBrowser } from "./compat";
-import { globals } from "./globals";
+import { globals } from "../model/globals";
 import { getStats } from "./stats";
 import { stopTimer } from "./timing";
 
