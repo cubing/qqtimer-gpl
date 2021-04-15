@@ -1,4 +1,5 @@
-import { $, toggleImport } from "../dom";
+import { toggleImport } from "../controller-ish/options";
+import { $ } from "../dom";
 import { globals } from "../model/globals";
 import { statsData } from "../model/statsData";
 
